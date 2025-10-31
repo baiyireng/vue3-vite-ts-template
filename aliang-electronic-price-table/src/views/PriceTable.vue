@@ -115,10 +115,12 @@ const navigateToCategory = (category: any) => {
       isModalVisible.value = true; // PC端显示模态框
     }
   } else {
-    console.log(`Navigating to ${category.name}`);
-    // 实现其他分类的导航逻辑
+    // 跳转到品类详情页面
+    const categoryId = categories.value.findIndex(c => c.name === category.name) + 1;
+    router.push({ name: 'CategoryDetails', params: { id: categoryId.toString() } });
   }
 };
+
 </script>
 <style lang="less">
 body{

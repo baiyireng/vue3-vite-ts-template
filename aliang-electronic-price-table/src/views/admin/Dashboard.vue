@@ -2,6 +2,11 @@
   <div class="admin-dashboard">
     <h1>阿良电竞价格表管理后台</h1>
     
+    <div class="navigation">
+      <router-link to="/admin/dashboard" class="nav-item active">首页管理</router-link>
+      <router-link to="/admin/categories" class="nav-item">品类管理</router-link>
+    </div>
+    
     <div class="management-section">
       <h2>图片资源管理</h2>
       <div class="image-management">
@@ -166,6 +171,28 @@ onBeforeUnmount(() => {
   padding: 20px;
   max-width: 1200px;
   margin: 0 auto;
+}
+
+.navigation {
+  display: flex;
+  margin-bottom: 30px;
+  border-bottom: 1px solid #eee;
+  
+  .nav-item {
+    padding: 10px 20px;
+    text-decoration: none;
+    color: #666;
+    border-bottom: 3px solid transparent;
+    
+    &.active {
+      color: #409eff;
+      border-bottom-color: #409eff;
+    }
+    
+    &:hover:not(.active) {
+      color: #333;
+    }
+  }
 }
 
 h1 {
