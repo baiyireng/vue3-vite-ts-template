@@ -175,9 +175,51 @@ const navigateToCategory = (category: any) => {
     }
 };
 
+// 从localStorage获取缓存的网站设置
+const getCachedWebsiteSettings = () => {
+    try {
+        const cachedSettings = localStorage.getItem('websiteSettings');
+        if (cachedSettings) {
+            const settings = JSON.parse(cachedSettings);
+            // 设置标题
+            if (settings.title) {
+                document.title = settings.title;
+            }
+            
+            // 设置favicon
+            if (settings.favicon) {
+                let favicon = document.querySelector("link[rel='icon']");
+                if (!favicon) {
+                    favicon = document.createElement('link');
+                    favicon.rel = 'icon';
+                    document.head.appendChild(favicon);
+                }
+                favicon.href = settings.favicon;
+            }
+            
+            return settings;
+        }
+    } catch (e) {
+        console.error('解析缓存的网站设置失败:', e);
+    }
+    return null;
+};
+
+// 保存网站设置到localStorage
+const cacheWebsiteSettings = (settings: any) => {
+    try {
+        localStorage.setItem('websiteSettings', JSON.stringify(settings));
+    } catch (e) {
+        console.error('缓存网站设置失败:', e);
+    }
+};
+
 // 从后端获取数据
 const fetchData = async () => {
     try {
+        // 先从缓存中获取网站设置
+        getCachedWebsiteSettings();
+        
         // 获取网站设置
         const websiteResponse = await websiteAPI.getSettings();
         if (websiteResponse.title) {
@@ -194,6 +236,9 @@ const fetchData = async () => {
             }
             favicon.href = websiteResponse.favicon;
         }
+        
+        // 缓存网站设置
+        cacheWebsiteSettings(websiteResponse);
 
         // 获取首页图片
         const imagesResponse = await homeAPI.getImages();
