@@ -1,106 +1,60 @@
 <template>
-  <div class="category-details">
-    <div class="header">
-      <button @click="goBack" class="back-button">返回</button>
-      <h1>{{ category?.name }}</h1>
+    <div class="recharge-benefits">
+        <!-- 头部信息 -->
+        <header class="header">
+            <img class="header_icon" :src="category?.icon" alt="" />
+            <!-- 说明 -->
+            <div class="title-container">
+                <h1>{{ category?.name }}</h1>
+                <p>2025-06-14 15:18</p>
+            </div>
+        </header>
+
+        <main class="recharge-benefits-content">
+            <!-- 长图展示 -->
+            <section v-if="category?.detail_image" class="image-section">
+                <img :src="category.detail_image" alt="充值福利及礼物" />
+            </section>
+
+            <!-- 注意事项 -->
+            <section class="notice-section" v-if="category?.notice">
+                <h2>注意事项</h2>
+                <div class="notice-content" v-html="category?.notice"></div>
+            </section>
+        </main>
+        <!-- 免责声明 -->
+        <Footer />
     </div>
-    
-    <div class="content">
-      <!-- 详情长图 -->
-      <div v-if="category?.detailImage" class="detail-image-section">
-        <img :src="category.detailImage" alt="详情长图" class="detail-image" />
-      </div>
-      
-      <!-- 富文本详情内容 -->
-      <div class="details-content" v-html="category?.details"></div>
-      
-      <!-- 注意事项 -->
-      <div v-if="category?.notice" class="notice-section">
-        <h2>注意事项</h2>
-        <div class="notice-content" v-html="category?.notice"></div>
-      </div>
-    </div>
-  </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-
-// 模拟品类数据（实际项目中应从API获取或通过状态管理传递）
-const categories = [
-  { 
-    id: '1', 
-    name: '预存须知', 
-    icon: new URL('@/assets/images/icon1.png', import.meta.url).href,
-    description: '预存须知相关说明',
-    detailImage: '', // 添加详情长图字段
-    details: '<p><strong>预存须知详细内容</strong></p><p>1. 预存款项不可退款</p><p>2. 预存款项有效期为一年</p><p>3. 预存款项可用于所有服务项目</p>',
-    notice: '<ul><li>个存只可消费固定陪</li><li>店存可转为个存超过520r，赠送陪陪微信*1</li><li>个存转店存需要扣除20%手续费</li><li>陪陪个存清空自愿保留绑板微信</li><li>备注：存单志择退款，退款需扣除20%服务费</li></ul>' // 添加注意事项字段
-  },
-  { 
-    id: '2', 
-    name: '三角洲行动...', 
-    icon: new URL('@/assets/images/icon2.png', import.meta.url).href,
-    description: '三角洲行动相关服务',
-    detailImage: '',
-    details: '<p><strong>三角洲行动服务详情</strong></p><p>1. 提供专业陪玩服务</p><p>2. 支持多平台游戏</p><p>3. 7x24小时在线服务</p>',
-    notice: ''
-  },
-  { 
-    id: '3', 
-    name: '三角洲护航...', 
-    icon: new URL('@/assets/images/icon3.png', import.meta.url).href,
-    description: '三角洲护航相关服务',
-    detailImage: '',
-    details: '<p><strong>三角洲护航服务详情</strong></p><p>1. 全程安全护航</p><p>2. 实时技术支持</p><p>3. 专属客服服务</p>',
-    notice: ''
-  },
-  { 
-    id: '4', 
-    name: '三角洲炸单...', 
-    icon: new URL('@/assets/images/icon4.png', import.meta.url).href,
-    description: '三角洲炸单相关服务',
-    detailImage: '',
-    details: '<p><strong>三角洲炸单服务详情</strong></p><p>1. 快速响应服务</p><p>2. 高效完成任务</p><p>3. 质量保证</p>',
-    notice: ''
-  },
-  { 
-    id: '5', 
-    name: '永劫无间', 
-    icon: new URL('@/assets/images/icon5.png', import.meta.url).href,
-    description: '永劫无间相关服务',
-    detailImage: '',
-    details: '<p><strong>永劫无间服务详情</strong></p><p>1. 专业段位提升</p><p>2. 技巧教学指导</p><p>3. 团队配合训练</p>',
-    notice: ''
-  },
-  { 
-    id: '6', 
-    name: '无畏契约', 
-    icon: new URL('@/assets/images/icon6.png', import.meta.url).href,
-    description: '无畏契约相关服务',
-    detailImage: '',
-    details: '<p><strong>无畏契约服务详情</strong></p><p>1. 竞技对战陪玩</p><p>2. 战术分析指导</p><p>3. 枪法训练提升</p>',
-    notice: ''
-  },
-  { 
-    id: '7', 
-    name: '其他游戏', 
-    icon: new URL('@/assets/images/icon7.png', import.meta.url).href,
-    description: '其他游戏相关服务',
-    detailImage: '',
-    details: '<p><strong>其他游戏服务详情</strong></p><p>1. 多种游戏支持</p><p>2. 定制化服务</p><p>3. 灵活时间安排</p>',
-    notice: ''
-  },
-];
+import { categoryAPI } from '@/api/index';
 
 const route = useRoute();
 const router = useRouter();
 const category = ref<any>(null);
 
+// 从后端获取品类详情
+const fetchCategoryDetails = async (categoryId: number) => {
+  try {
+    const response = await categoryAPI.getById(categoryId);
+    if (response.category) {
+      category.value = response.category;
+    } else {
+      console.error('未找到指定品类');
+    }
+  } catch (error) {
+    console.error('获取品类详情失败:', error);
+  }
+};
+
 onMounted(() => {
-  const categoryId = route.params.id as string;
-  category.value = categories.find(c => c.id === categoryId) || null;
+  const categoryId = parseInt(route.params.id as string);
+  if (categoryId) {
+    fetchCategoryDetails(categoryId);
+  }
 });
 
 const goBack = () => {
@@ -109,90 +63,110 @@ const goBack = () => {
 </script>
 
 <style scoped lang="less">
-.category-details {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
-  
-  .header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 30px;
-    
-    .back-button {
-      background: #409eff;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 4px;
-      cursor: pointer;
-      margin-right: 20px;
-      
-      &:hover {
-        background: #66b1ff;
-      }
-    }
-    
-    h1 {
-      margin: 0;
-      color: #333;
-    }
-  }
-  
-  .content {
-    background: white;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    
-    .detail-image-section {
-      text-align: center;
-      margin-bottom: 30px;
-      
-      .detail-image {
-        max-width: 100%;
-        height: auto;
-        border-radius: 4px;
-      }
-    }
-    
-    .details-content {
-      :deep(h1), :deep(h2), :deep(h3) {
-        color: #333;
-      }
-      
-      :deep(p) {
-        line-height: 1.6;
-        color: #666;
-      }
-      
-      :deep(strong) {
-        color: #333;
-      }
-    }
-    
-    .notice-section {
-      margin-top: 30px;
-      padding-top: 20px;
-      border-top: 1px solid #eee;
-      
-      h2 {
-        color: #333;
-        margin-top: 0;
-      }
-      
-      .notice-content {
-        :deep(ul) {
-          padding-left: 20px;
-          
-          li {
-            margin: 10px 0;
-            line-height: 1.6;
-            color: #666;
-          }
+.recharge-benefits {
+    font-family: Arial, sans-serif;
+    color: #333;
+    max-width: 1296px;
+    margin: auto;
+
+    .header {
+        // text-align: center;
+        padding: 48px 48px 0;
+        display: flex;
+        align-items: center;
+        .header_icon {
+            width: 80px;
+            height: 80px;
+            margin-right: 16px;
+            object-fit: cover;
+            border-radius: 9px;
         }
-      }
+
+        .title-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        h1 {
+            max-width: 100%;
+            min-width: 400px;
+            height: 38px;
+            color: rgba(0, 0, 0, 0.85);
+            text-overflow: ellipsis;
+            word-break: break-word;
+            white-space: nowrap;
+            padding-top: 6px;
+            font-size: 20px;
+            font-weight: 600;
+            line-height: 28px;
+            overflow: hidden;
+            margin: 0;
+        }
+
+        p {
+            margin: 0;
+            font-size: 14px;
+            line-height: 22px;
+            text-overflow: ellipsis;
+            word-break: break-word;
+            white-space: nowrap;
+            overflow: hidden;
+        }
     }
-  }
+    .recharge-benefits-content {
+        padding: 0 48px 0;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+
+    .image-section {
+        margin: 20px 0;
+        width: 40%;
+        img {
+            width: 100%;
+            display: block;
+        }
+    }
+
+    .notice-section {
+        // padding: 20px;
+        // background-color: #fff;
+        // border-radius: 10px;
+        // box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        width: 40%;
+
+        h2 {
+            font-size: 20px;
+            margin-top: 0;
+        }
+
+        ul {
+            list-style-type: none;
+            padding-left: 0;
+
+            li {
+                margin: 10px 0;
+            }
+        }
+    }
+}
+@media screen {
+    @media (max-width: 768px) {
+        .recharge-benefits{
+            .recharge-benefits-content{
+                flex-direction: column;
+                align-items: center;
+                .image-section{
+                    width: 100%;
+                }
+                .notice-section{
+                    width: 100%;
+                }
+    
+            }
+        }
+    }
 }
 </style>

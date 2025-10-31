@@ -86,9 +86,9 @@
             <label>详情长图（可选）</label>
             <div class="image-preview" @click="selectDetailImage">
               <img 
-                :src="editingCategory.detailImage" 
+                :src="editingCategory.detail_image" 
                 alt="详情长图" 
-                v-if="editingCategory.detailImage" 
+                v-if="editingCategory.detail_image" 
                 class="preview-icon"
               />
               <div class="no-image" v-else>点击上传详情长图</div>
@@ -100,6 +100,25 @@
               accept="image/*"
               style="display: none"
             />
+          </div>
+          
+          <div class="form-group">
+            <label for="categoryDetails">详情内容（富文本）</label>
+            <div style="border: 1px solid #ccc; margin-top: 10px;">
+              <Toolbar
+                style="border-bottom: 1px solid #ccc"
+                :editor="detailsEditorRef"
+                :defaultConfig="toolbarConfig"
+                :mode="mode"
+              />
+              <Editor
+                style="height: 200px; overflow-y: hidden;"
+                v-model="editingCategory.details"
+                :defaultConfig="editorConfig"
+                :mode="mode"
+                @onCreated="handleDetailsCreated"
+              />
+            </div>
           </div>
           
           <div class="form-group">
@@ -136,13 +155,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onBeforeUnmount } from 'vue'
+import { ref, reactive, onBeforeUnmount, onMounted } from 'vue'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 import '@wangeditor/editor/dist/css/style.css'
+import { categoryAPI } from '@/api/index'
 
 // 编辑器实例
 const editorRef = ref()
 const noticeEditorRef = ref()
+const detailsEditorRef = ref()
 
 const mode = ref('default')
 
@@ -160,73 +181,18 @@ const editorConfig = {
 }
 
 // 品类数据
-const categories = ref([
-  { 
-    id: '1', 
-    name: '预存须知', 
-    icon: new URL('@/assets/images/icon1.png', import.meta.url).href,
-    description: '预存须知相关说明',
-    detailImage: '', // 添加详情长图字段
-    notice: '<ul><li>个存只可消费固定陪</li><li>店存可转为个存超过520r，赠送陪陪微信*1</li><li>个存转店存需要扣除20%手续费</li><li>陪陪个存清空自愿保留绑板微信</li><li>备注：存单志择退款，退款需扣除20%服务费</li></ul>' // 添加注意事项字段
-  },
-  { 
-    id: '2', 
-    name: '三角洲行动...', 
-    icon: new URL('@/assets/images/icon2.png', import.meta.url).href,
-    description: '三角洲行动相关服务',
-    detailImage: '',
-    notice: ''
-  },
-  { 
-    id: '3', 
-    name: '三角洲护航...', 
-    icon: new URL('@/assets/images/icon3.png', import.meta.url).href,
-    description: '三角洲护航相关服务',
-    detailImage: '',
-    notice: ''
-  },
-  { 
-    id: '4', 
-    name: '三角洲炸单...', 
-    icon: new URL('@/assets/images/icon4.png', import.meta.url).href,
-    description: '三角洲炸单相关服务',
-    detailImage: '',
-    notice: ''
-  },
-  { 
-    id: '5', 
-    name: '永劫无间', 
-    icon: new URL('@/assets/images/icon5.png', import.meta.url).href,
-    description: '永劫无间相关服务',
-    detailImage: '',
-    notice: ''
-  },
-  { 
-    id: '6', 
-    name: '无畏契约', 
-    icon: new URL('@/assets/images/icon6.png', import.meta.url).href,
-    description: '无畏契约相关服务',
-    detailImage: '',
-    notice: ''
-  },
-  { 
-    id: '7', 
-    name: '其他游戏', 
-    icon: new URL('@/assets/images/icon7.png', import.meta.url).href,
-    description: '其他游戏相关服务',
-    detailImage: '',
-    notice: ''
-  },
-])
+const categories = ref([])
 
 // 编辑中的品类
 const editingCategory = reactive({
-  id: '',
+  id: 0,
   name: '',
   icon: '',
   description: '',
-  detailImage: '', // 添加详情长图字段
-  notice: '' // 添加注意事项字段
+  detail_image: '', // 添加详情长图字段
+  details: '', // 添加详情内容字段
+  notice: '', // 添加注意事项字段
+  sort_order: 0
 })
 
 // 模态框显示状态
@@ -244,12 +210,14 @@ const isError = ref(false)
 const addCategory = () => {
   // 重置编辑中的品类
   Object.assign(editingCategory, {
-    id: '',
+    id: 0,
     name: '',
     icon: '',
     description: '',
-    detailImage: '',
-    notice: ''
+    detail_image: '',
+    details: '',
+    notice: '',
+    sort_order: 0
   })
   showEditModal.value = true
 }
@@ -261,54 +229,79 @@ const editCategory = (category: any) => {
 }
 
 // 保存品类
-const saveCategory = () => {
+const saveCategory = async () => {
   if (!editingCategory.name) {
     showMessage('请输入品类名称', true)
     return
   }
   
-  if (editingCategory.id) {
-    // 更新现有品类
-    const index = categories.value.findIndex(c => c.id === editingCategory.id)
-    if (index !== -1) {
-      categories.value[index] = { ...editingCategory }
+  try {
+    if (editingCategory.id) {
+      // 更新现有品类
+      await categoryAPI.update(editingCategory.id, editingCategory)
+    } else {
+      // 添加新品类
+      await categoryAPI.create(editingCategory)
     }
-  } else {
-    // 添加新品类
-    const newCategory = {
-      ...editingCategory,
-      id: Date.now().toString()
-    }
-    categories.value.push(newCategory)
+    
+    closeEditModal()
+    showMessage('保存成功')
+    fetchCategories() // 重新获取品类列表
+  } catch (error) {
+    console.error('保存失败:', error)
+    showMessage('保存失败', true)
   }
-  
-  closeEditModal()
-  showMessage('保存成功')
 }
 
 // 删除品类
-const deleteCategory = (id: string) => {
+const deleteCategory = async (id: number) => {
   if (confirm('确定要删除这个品类吗？')) {
-    categories.value = categories.value.filter(c => c.id !== id)
-    showMessage('删除成功')
+    try {
+      await categoryAPI.delete(id)
+      showMessage('删除成功')
+      fetchCategories() // 重新获取品类列表
+    } catch (error) {
+      console.error('删除失败:', error)
+      showMessage('删除失败', true)
+    }
   }
 }
 
 // 上移品类
-const moveCategoryUp = (index: number) => {
+const moveCategoryUp = async (index: number) => {
   if (index > 0) {
-    const temp = categories.value[index]
-    categories.value[index] = categories.value[index - 1]
-    categories.value[index - 1] = temp
+    try {
+      const currentCategory = categories.value[index]
+      const prevCategory = categories.value[index - 1]
+      
+      // 交换排序
+      await categoryAPI.updateSortOrder(currentCategory.id, prevCategory.sort_order)
+      await categoryAPI.updateSortOrder(prevCategory.id, currentCategory.sort_order)
+      
+      fetchCategories() // 重新获取品类列表
+    } catch (error) {
+      console.error('移动失败:', error)
+      showMessage('移动失败', true)
+    }
   }
 }
 
 // 下移品类
-const moveCategoryDown = (index: number) => {
+const moveCategoryDown = async (index: number) => {
   if (index < categories.value.length - 1) {
-    const temp = categories.value[index]
-    categories.value[index] = categories.value[index + 1]
-    categories.value[index + 1] = temp
+    try {
+      const currentCategory = categories.value[index]
+      const nextCategory = categories.value[index + 1]
+      
+      // 交换排序
+      await categoryAPI.updateSortOrder(currentCategory.id, nextCategory.sort_order)
+      await categoryAPI.updateSortOrder(nextCategory.id, currentCategory.sort_order)
+      
+      fetchCategories() // 重新获取品类列表
+    } catch (error) {
+      console.error('移动失败:', error)
+      showMessage('移动失败', true)
+    }
   }
 }
 
@@ -352,7 +345,7 @@ const handleDetailImageUpload = (event: Event) => {
     const reader = new FileReader()
     reader.onload = (e) => {
       const imageUrl = e.target?.result as string
-      editingCategory.detailImage = imageUrl
+      editingCategory.detail_image = imageUrl
     }
     reader.readAsDataURL(file)
     
@@ -375,15 +368,38 @@ const showMessage = (msg: string, error: boolean = false) => {
   }, 3000)
 }
 
+// 从后端获取品类列表
+const fetchCategories = async () => {
+  try {
+    const response = await categoryAPI.getAll()
+    if (response.categories) {
+      categories.value = response.categories
+    }
+  } catch (error) {
+    console.error('获取品类列表失败:', error)
+    showMessage('获取品类列表失败', true)
+  }
+}
+
 // 编辑器创建回调
 const handleCreated = (editor: any) => {
   editorRef.value = editor
+}
+
+// 详情内容编辑器创建回调
+const handleDetailsCreated = (editor: any) => {
+  detailsEditorRef.value = editor
 }
 
 // 注意事项编辑器创建回调
 const handleNoticeCreated = (editor: any) => {
   noticeEditorRef.value = editor
 }
+
+// 组件挂载时获取数据
+onMounted(() => {
+  fetchCategories()
+})
 
 // 组件销毁时销毁编辑器
 onBeforeUnmount(() => {
@@ -394,6 +410,10 @@ onBeforeUnmount(() => {
   const noticeEditor = noticeEditorRef.value
   if (noticeEditor == null) return
   noticeEditor.destroy()
+  
+  const detailsEditor = detailsEditorRef.value
+  if (detailsEditor == null) return
+  detailsEditor.destroy()
 })
 </script>
 
@@ -451,10 +471,12 @@ h2 {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px;
-    border: 1px solid #eee;
-    border-radius: 4px;
-    margin-bottom: 15px;
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+    
+    &:last-child {
+      border-bottom: none;
+    }
     
     .category-info {
       display: flex;
@@ -462,70 +484,65 @@ h2 {
       flex: 1;
       
       .category-icon {
-        width: 50px;
-        height: 50px;
+        width: 60px;
+        height: 60px;
         border-radius: 50%;
-        margin-right: 15px;
+        margin-right: 20px;
         object-fit: cover;
       }
       
       .category-details {
         h3 {
           margin: 0 0 5px 0;
-          font-size: 16px;
+          color: #333;
         }
         
         p {
           margin: 0;
-          color: #666;
+          color: #999;
           font-size: 14px;
         }
       }
     }
     
     .category-actions {
-      display: flex;
-      gap: 10px;
-      
       button {
-        padding: 6px 12px;
+        margin-left: 10px;
+        padding: 8px 16px;
         border: none;
         border-radius: 4px;
         cursor: pointer;
-        font-size: 14px;
-      }
-      
-      .edit-button {
-        background: #409eff;
-        color: white;
         
-        &:hover {
-          background: #66b1ff;
-        }
-      }
-      
-      .move-up-button,
-      .move-down-button {
-        background: #e6a23c;
-        color: white;
-        
-        &:hover:not(:disabled) {
-          background: #ebb563;
+        &.edit-button {
+          background: #409eff;
+          color: white;
+          
+          &:hover {
+            background: #66b1ff;
+          }
         }
         
-        &:disabled {
-          background: #f5f5f5;
-          color: #ccc;
-          cursor: not-allowed;
+        &.move-up-button, &.move-down-button {
+          background: #67c23a;
+          color: white;
+          
+          &:disabled {
+            background: #dcdfe6;
+            cursor: not-allowed;
+          }
+          
+          &:hover:not(:disabled) {
+            background: #85ce61;
+          }
         }
-      }
-      
-      .delete-button {
-        background: #f56c6c;
-        color: white;
         
-        &:hover {
-          background: #f78989;
+        &.delete-button {
+          background: #f56c6c;
+          color: white;
+          
+          &:hover {
+            background: #f78989;
+          }
         }
       }
     }
@@ -533,13 +550,13 @@ h2 {
   
   .add-category {
     text-align: center;
-    margin-top: 20px;
+    padding: 20px;
     
     .add-button {
       background: #67c23a;
       color: white;
       border: none;
-      padding: 10px 20px;
+      padding: 12px 30px;
       font-size: 16px;
       border-radius: 4px;
       cursor: pointer;
@@ -555,27 +572,27 @@ h2 {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   z-index: 1000;
 }
 
 .modal-content {
   background: white;
   border-radius: 8px;
+  padding: 30px;
   width: 90%;
-  max-width: 800px;
+  max-width: 600px;
   max-height: 90vh;
   overflow-y: auto;
-  padding: 20px;
   
   h2 {
     margin-top: 0;
-    text-align: center;
+    color: #333;
   }
   
   .category-form {
@@ -586,15 +603,31 @@ h2 {
         display: block;
         margin-bottom: 8px;
         font-weight: 500;
+        color: #333;
       }
       
-      input,
-      textarea {
+      input, textarea {
         width: 100%;
-        padding: 10px;
-        border: 1px solid #ddd;
+        padding: 12px 15px;
+        border: 1px solid #dcdfe6;
         border-radius: 4px;
         box-sizing: border-box;
+        font-size: 14px;
+        transition: border-color 0.3s;
+        
+        &:focus {
+          outline: none;
+          border-color: #409eff;
+          box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
+        }
+        
+        &::placeholder {
+          color: #c0c4cc;
+        }
+      }
+      
+      textarea {
+        resize: vertical;
       }
       
       .image-preview {
@@ -607,7 +640,7 @@ h2 {
         cursor: pointer;
         overflow: hidden;
         
-        .preview-icon {
+        img {
           max-width: 100%;
           max-height: 100%;
           object-fit: cover;
@@ -621,33 +654,33 @@ h2 {
     
     .form-actions {
       display: flex;
-      justify-content: center;
-      gap: 20px;
+      justify-content: flex-end;
+      gap: 10px;
       margin-top: 30px;
       
       button {
-        padding: 10px 30px;
+        padding: 12px 30px;
         border: none;
         border-radius: 4px;
         cursor: pointer;
-        font-size: 16px;
-      }
-      
-      .cancel-button {
-        background: #909399;
-        color: white;
+        font-size: 14px;
         
-        &:hover {
-          background: #a6a9ad;
+        &.cancel-button {
+          background: #909399;
+          color: white;
+          
+          &:hover {
+            background: #a6a9ad;
+          }
         }
-      }
-      
-      .save-button {
-        background: #409eff;
-        color: white;
         
-        &:hover {
-          background: #66b1ff;
+        &.save-button {
+          background: #409eff;
+          color: white;
+          
+          &:hover {
+            background: #66b1ff;
+          }
         }
       }
     }
@@ -665,6 +698,37 @@ h2 {
   &.error {
     color: #f56c6c;
     background-color: #fef0f0;
+  }
+}
+
+@media (max-width: 768px) {
+  .category-item {
+    flex-direction: column;
+    align-items: flex-start;
+    
+    .category-info {
+      margin-bottom: 15px;
+    }
+    
+    .category-actions {
+      align-self: stretch;
+      display: flex;
+      justify-content: space-between;
+      
+      button {
+        margin: 0;
+        flex: 1;
+        
+        &:not(:last-child) {
+          margin-right: 5px;
+        }
+      }
+    }
+  }
+  
+  .modal-content {
+    width: 95%;
+    padding: 20px;
   }
 }
 </style>

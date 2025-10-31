@@ -10,16 +10,16 @@
     <div class="management-section">
       <h2>图片资源管理</h2>
       <div class="image-management">
-        <div class="image-item" v-for="image in images" :key="image.id">
+        <div class="image-item" v-for="image in images" :key="image.name">
           <label>{{ image.label }}</label>
-          <div class="image-preview" @click="selectImage(image.id)">
+          <div class="image-preview" @click="selectImage(image.name)">
             <img :src="image.url" :alt="image.label" v-if="image.url" />
             <div class="no-image" v-else>点击上传图片</div>
           </div>
           <input 
             type="file" 
-            :ref="el => setImageInputRef(el, image.id)"
-            @change="handleImageUpload($event, image.id)"
+            :ref="el => setImageInputRef(el, image.name)"
+            @change="handleImageUpload($event, image.name)"
             accept="image/*"
             style="display: none"
           />
@@ -84,9 +84,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onBeforeUnmount } from 'vue'
+import { ref, reactive, onBeforeUnmount, onMounted } from 'vue'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 import '@wangeditor/editor/dist/css/style.css'
+import { homeAPI } from '@/api/index'
 
 // 编辑器实例，必须用 shallowRef
 const editorRef = ref()
@@ -117,9 +118,9 @@ const titles = reactive({
 
 // 图片数据（仅保留首页相关图片）
 const images = reactive([
-  { id: 'banner', label: '首页横幅图片', url: new URL('@/assets/images/banner.png', import.meta.url).href },
-  { id: 'orderNotice', label: '下单须知图片', url: new URL('@/assets/images/order_notice.png', import.meta.url).href },
-  { id: 'contactInfo', label: '联系方式图片', url: new URL('@/assets/images/contact_info.png', import.meta.url).href },
+  { name: 'banner', label: '首页横幅图片', url: '' },
+  { name: 'orderNotice', label: '下单须知图片', url: '' },
+  { name: 'contactInfo', label: '联系方式图片', url: '' },
 ])
 
 // 图片上传输入框引用
@@ -130,22 +131,22 @@ const message = ref('')
 const isError = ref(false)
 
 // 设置图片输入框引用
-const setImageInputRef = (el: HTMLInputElement | null, id: string) => {
+const setImageInputRef = (el: HTMLInputElement | null, name: string) => {
   if (el) {
-    imageInputRefs.value[id] = el
+    imageInputRefs.value[name] = el
   }
 }
 
 // 选择图片（触发文件选择）
-const selectImage = (id: string) => {
-  const input = imageInputRefs.value[id]
+const selectImage = (name: string) => {
+  const input = imageInputRefs.value[name]
   if (input) {
     input.click()
   }
 }
 
 // 处理图片上传
-const handleImageUpload = (event: Event, id: string) => {
+const handleImageUpload = (event: Event, name: string) => {
   const target = event.target as HTMLInputElement
   const file = target.files?.[0]
   
@@ -155,7 +156,7 @@ const handleImageUpload = (event: Event, id: string) => {
     const reader = new FileReader()
     reader.onload = (e) => {
       const imageUrl = e.target?.result as string
-      const image = images.find(img => img.id === id)
+      const image = images.find(img => img.name === name)
       if (image) {
         image.url = imageUrl
       }
@@ -172,17 +173,74 @@ const handleCreated = (editor: any) => {
   editorRef.value = editor // 记录 editor 实例，重要！
 }
 
+// 从后端获取数据
+const fetchData = async () => {
+  try {
+    // 获取首页图片
+    const imagesResponse = await homeAPI.getImages();
+    if (imagesResponse.images) {
+      imagesResponse.images.forEach((image: any) => {
+        const img = images.find(i => i.name === image.name);
+        if (img) {
+          img.url = image.url;
+        }
+      });
+    }
+
+    // 获取标题
+    const titlesResponse = await homeAPI.getTitles();
+    if (titlesResponse.titles) {
+      Object.assign(titles, titlesResponse.titles);
+    }
+
+    // 获取下单须知
+    const noticeResponse = await homeAPI.getOrderNotice();
+    if (noticeResponse.notice) {
+      orderNoticeText.value = noticeResponse.notice;
+    }
+  } catch (error) {
+    console.error('获取数据失败:', error);
+    showMessage('获取数据失败', true);
+  }
+};
+
 // 保存更改
-const saveChanges = () => {
-  // 在实际项目中，这里应该调用后端API保存数据
-  message.value = '保存成功！'
-  isError.value = false
+const saveChanges = async () => {
+  try {
+    // 保存图片
+    for (const image of images) {
+      await homeAPI.updateImage(image.name, image.url);
+    }
+
+    // 保存标题
+    await homeAPI.updateTitle('categorySection', titles.categorySection);
+    await homeAPI.updateTitle('orderSection', titles.orderSection);
+
+    // 保存下单须知
+    await homeAPI.updateOrderNotice(orderNoticeText.value);
+
+    showMessage('保存成功！');
+  } catch (error) {
+    console.error('保存失败:', error);
+    showMessage('保存失败', true);
+  }
+};
+
+// 显示消息
+const showMessage = (msg: string, error: boolean = false) => {
+  message.value = msg;
+  isError.value = error;
   
   // 3秒后清除消息
   setTimeout(() => {
-    message.value = ''
-  }, 3000)
-}
+    message.value = '';
+  }, 3000);
+};
+
+// 组件挂载时获取数据
+onMounted(() => {
+  fetchData();
+});
 
 // 组件销毁时销毁编辑器
 onBeforeUnmount(() => {
