@@ -76,7 +76,9 @@
     </div>
 
     <div class="form-actions">
-      <button @click="saveChanges" class="save-button">保存更改</button>
+      <button @click="saveChanges" class="save-button" :disabled="loading">
+        {{ loading ? '保存中...' : '保存更改' }}
+      </button>
     </div>
 
     <div v-if="message" class="message" :class="{ error: isError }">
@@ -90,6 +92,7 @@ import { ref, reactive, onBeforeUnmount, onMounted } from 'vue'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 import '@wangeditor/editor/dist/css/style.css'
 import { homeAPI } from '@/api/index'
+import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
 
 // 编辑器实例，必须用 shallowRef
@@ -132,6 +135,7 @@ const imageInputRefs = ref<{[key: string]: HTMLInputElement}>({})
 // 消息提示
 const message = ref('')
 const isError = ref(false)
+const loading = ref(false)
 
 // 路由
 const router = useRouter()
@@ -206,12 +210,13 @@ const fetchData = async () => {
     }
   } catch (error) {
     console.error('获取数据失败:', error);
-    showMessage('获取数据失败', true);
+    ElMessage.error('获取数据失败');
   }
 };
 
 // 保存更改
 const saveChanges = async () => {
+  loading.value = true;
   try {
     // 保存图片
     for (const image of images) {
@@ -225,22 +230,13 @@ const saveChanges = async () => {
     // 保存下单须知
     await homeAPI.updateOrderNotice(orderNoticeText.value);
 
-    showMessage('保存成功！');
+    ElMessage.success('保存成功！');
   } catch (error) {
     console.error('保存失败:', error);
-    showMessage('保存失败', true);
+    ElMessage.error('保存失败，请重试');
+  } finally {
+    loading.value = false;
   }
-};
-
-// 显示消息
-const showMessage = (msg: string, error: boolean = false) => {
-  message.value = msg;
-  isError.value = error;
-  
-  // 3秒后清除消息
-  setTimeout(() => {
-    message.value = '';
-  }, 3000);
 };
 
 // 退出登录
@@ -414,7 +410,12 @@ h2 {
   border-radius: 4px;
   cursor: pointer;
   
-  &:hover {
+  &:disabled {
+    background: #a0cfff;
+    cursor: not-allowed;
+  }
+  
+  &:not(:disabled):hover {
     background: #66b1ff;
   }
 }
