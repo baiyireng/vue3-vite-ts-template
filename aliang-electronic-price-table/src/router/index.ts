@@ -1,17 +1,22 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router';
-// 确保路径正确，使用相对路径或别名
 import PriceTable from '@/views/PriceTable.vue';
+import RechargeBenefits from '@/views/RechargeBenefits.vue'; // 引入新组件
 
-const routes = [
+const routes: Array<RouteRecordRaw> = [
     {
         path: '/',
         name: 'PriceTable',
         component: PriceTable,
     },
+    {
+        path: '/recharge-benefits',
+        name: 'RechargeBenefits',
+        component: RechargeBenefits, // 添加新路由
+    },
 ];
 
 const router = createRouter({
-    history: createWebHistory(''), // 修改：将 process.env.BASE_URL 替换为空字符串
+    history: createWebHistory(''),
     routes,
 });
 

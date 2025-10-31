@@ -93,8 +93,12 @@ const handleClick = (img) => {
 };
 // 导航方法
 const navigateToCategory = (category: any) => {
-  console.log(`Navigating to ${category.name}`);
-  // 实现导航逻辑
+    if (category.name === '预存须知') {
+        router.push({ name: 'RechargeBenefits' }); // 导航到新页面
+    } else {
+        console.log(`Navigating to ${category.name}`);
+        // 实现其他分类的导航逻辑
+    }
 };
 </script>
 
