@@ -3,6 +3,7 @@ import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import PriceTable from '@/views/PriceTable.vue';
 import RechargeBenefits from '@/views/RechargeBenefits.vue';
 import AdminLogin from '@/views/AdminLogin.vue';
+import AdminDashboard from '@/views/admin/Dashboard.vue';
 
 const routes = [
   {
@@ -19,6 +20,11 @@ const routes = [
     path: '/admin/login',
     name: 'AdminLogin',
     component: AdminLogin,
+  },
+  {
+    path: '/admin/dashboard',
+    name: 'AdminDashboard',
+    component: AdminDashboard,
   },
 ];
 

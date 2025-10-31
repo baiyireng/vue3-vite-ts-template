@@ -72,8 +72,8 @@ const handleLogin = async () => {
     
     // 简单的用户名密码验证（实际项目中应调用后端接口）
     if (loginForm.username === 'admin' && loginForm.password === '123456') {
-      // 登录成功，跳转到管理页面（这里暂时跳转到价格表页面）
-      router.push('/');
+      // 登录成功，跳转到管理后台首页
+      router.push('/admin/dashboard');
     } else {
       error.value = '用户名或密码错误';
     }
