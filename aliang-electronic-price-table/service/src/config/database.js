@@ -60,6 +60,14 @@ async function initDatabase() {
         notice TEXT
       )`);
       
+      dbInstance.run(`CREATE TABLE users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT NOT NULL UNIQUE,
+        password TEXT NOT NULL,
+        name TEXT NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )`);
+      
       // 插入默认数据
       dbInstance.run(`INSERT OR IGNORE INTO home_images (name, url, label) VALUES ('banner', '', '首页横幅图片')`);
       dbInstance.run(`INSERT OR IGNORE INTO home_images (name, url, label) VALUES ('orderNotice', '', '下单须知图片')`);
@@ -90,7 +98,8 @@ function ensureDefaultData() {
   if (!dbInstance) return;
   
   // 检查home_images表中的默认数据
-  const homeImages = dbInstance.exec("SELECT COUNT(*) as count FROM home_images")[0].values[0][0];
+  const homeImagesResult = dbInstance.exec("SELECT COUNT(*) as count FROM home_images");
+  const homeImages = homeImagesResult.length > 0 ? homeImagesResult[0].values[0][0] : 0;
   if (homeImages === 0) {
     dbInstance.run(`INSERT INTO home_images (name, url, label) VALUES ('banner', '', '首页横幅图片')`);
     dbInstance.run(`INSERT INTO home_images (name, url, label) VALUES ('orderNotice', '', '下单须知图片')`);
@@ -98,16 +107,29 @@ function ensureDefaultData() {
   }
   
   // 检查titles表中的默认数据
-  const titles = dbInstance.exec("SELECT COUNT(*) as count FROM titles")[0].values[0][0];
+  const titlesResult = dbInstance.exec("SELECT COUNT(*) as count FROM titles");
+  const titles = titlesResult.length > 0 ? titlesResult[0].values[0][0] : 0;
   if (titles === 0) {
     dbInstance.run(`INSERT INTO titles (section, title) VALUES ('categorySection', '阿良电竞各品类价格表（点击图标查看）')`);
     dbInstance.run(`INSERT INTO titles (section, title) VALUES ('orderSection', '阿良电竞 | 下单价格')`);
   }
   
   // 检查order_notices表中的默认数据
-  const orderNotices = dbInstance.exec("SELECT COUNT(*) as count FROM order_notices")[0].values[0][0];
+  const orderNoticesResult = dbInstance.exec("SELECT COUNT(*) as count FROM order_notices");
+  const orderNotices = orderNoticesResult.length > 0 ? orderNoticesResult[0].values[0][0] : 0;
   if (orderNotices === 0) {
     dbInstance.run(`INSERT INTO order_notices (id, notice) VALUES (1, '暂无下单须知')`);
+  }
+  
+  // 检查users表中的默认数据
+  const usersResult = dbInstance.exec("SELECT COUNT(*) as count FROM users");
+  const users = usersResult.length > 0 ? usersResult[0].values[0][0] : 0;
+  if (users === 0) {
+    // 从环境变量获取默认用户名和密码
+    const defaultUsername = process.env.ADMIN_USERNAME || 'admin';
+    const defaultPassword = process.env.ADMIN_PASSWORD || 'Admin@123';
+    dbInstance.run(`INSERT INTO users (username, password, name) VALUES (?, ?, ?)`, 
+      [defaultUsername, defaultPassword, '管理员']);
   }
   
   // 保存更改

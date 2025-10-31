@@ -42,6 +42,23 @@ yarn dev
 yarn build
 ```
 
+### 管理员账号配置
+项目使用环境变量配置管理员账号密码，确保安全性且便于部署。
+
+1. 在项目根目录下创建或编辑 `.env` 文件：
+```env
+# 管理员账号密码配置
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=Admin@123
+```
+
+2. 重启后端服务使配置生效：
+```bash
+cd service
+docker-compose down
+docker-compose up -d
+```
+
 ## 项目结构
 ```bash
 admin/

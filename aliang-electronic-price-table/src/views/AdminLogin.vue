@@ -49,10 +49,6 @@
       <div v-if="error" class="error-message">
         {{ error }}
       </div>
-      
-      <div class="login-hint">
-        <p>提示：演示账号 admin / Admin@123</p>
-      </div>
     </div>
   </div>
 </template>
@@ -259,13 +255,6 @@ const handleLogin = async () => {
   text-align: center;
   margin-top: 15px;
   font-size: 14px;
-}
-
-.login-hint {
-  margin-top: 20px;
-  text-align: center;
-  font-size: 12px;
-  color: #6c757d;
 }
 
 @media (max-width: 480px) {

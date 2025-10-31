@@ -5,6 +5,7 @@ import RechargeBenefits from '@/views/RechargeBenefits.vue';
 import AdminLogin from '@/views/AdminLogin.vue';
 import AdminDashboard from '@/views/admin/Dashboard.vue';
 import CategoryManagement from '@/views/admin/CategoryManagement.vue';
+import AccountManagement from '@/views/admin/AccountManagement.vue';
 import CategoryDetails from '@/views/CategoryDetails.vue';
 
 // 检查用户是否已登录（基于本地存储）
@@ -20,17 +21,23 @@ const verifyToken = async () => {
   }
 
   try {
-    // 验证token有效性
-    const response = await fetch('http://localhost:3000/api/auth/verify-token', {
-      method: 'POST',
+    // 调用新的认证接口获取用户信息（需在请求头中传递 token）
+    const response = await fetch('http://localhost:3000/api/auth/me', {
+      method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ token })
+        'Authorization': `Bearer ${token}`
+      }
     });
 
-    const data = await response.json();
-    return data.success;
+    // 只有当状态码为 200 时表示认证成功
+    if (response.ok) {
+      const userData = await response.json();
+      console.log('Authenticated user:', userData);
+      return true;
+    } else {
+      return false;
+    }
   } catch (error) {
     console.error('Token verification failed:', error);
     return false;
@@ -71,6 +78,12 @@ const routes = [
     path: '/admin/categories',
     name: 'CategoryManagement',
     component: CategoryManagement,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/admin/account',
+    name: 'AccountManagement',
+    component: AccountManagement,
     meta: { requiresAuth: true }
   },
   {

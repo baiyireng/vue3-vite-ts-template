@@ -1,0 +1,1 @@
+const fs = require('fs'); const initSqlJs = require('sql.js'); async function readDB() { const SQL = await initSqlJs(); const data = fs.readFileSync('data/database.sqlite'); const db = new SQL.Database(data); const users = db.exec('SELECT * FROM users'); console.log(JSON.stringify(users, null, 2)); } readDB();

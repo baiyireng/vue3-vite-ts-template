@@ -9,6 +9,14 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     CategoryDetailModal: typeof import('./src/components/CategoryDetailModal.vue')['default']
+    ElAlert: typeof import('element-plus/es')['ElAlert']
+    ElButton: typeof import('element-plus/es')['ElButton']
+    ElCard: typeof import('element-plus/es')['ElCard']
+    ElDialog: typeof import('element-plus/es')['ElDialog']
+    ElDivider: typeof import('element-plus/es')['ElDivider']
+    ElForm: typeof import('element-plus/es')['ElForm']
+    ElFormItem: typeof import('element-plus/es')['ElFormItem']
+    ElInput: typeof import('element-plus/es')['ElInput']
     Footer: typeof import('./src/components/Footer.vue')['default']
     RechargeBenefitsModal: typeof import('./src/components/RechargeBenefitsModal.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
