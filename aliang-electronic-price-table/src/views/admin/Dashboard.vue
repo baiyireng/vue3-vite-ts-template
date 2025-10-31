@@ -1,6 +1,6 @@
 <template>
   <div class="admin-dashboard">
-    <h1>阿良电竞价格表管理后台</h1>
+    <!-- <h1>阿良电竞价格表管理后台</h1>
     
     <div class="navigation">
       <router-link to="/admin/dashboard" class="nav-item" :class="{ active: activeTab === 'home' }" @click="activeTab = 'home'">首页管理</router-link>
@@ -9,7 +9,7 @@
       <router-link to="/admin/website" class="nav-item" :class="{ active: activeTab === 'website' }" @click="activeTab = 'website'">网站设置</router-link>
       <button @click="handleLogout" class="logout-button">退出登录</button>
     </div>
-    
+     -->
     <!-- 首页管理 -->
     <div v-if="activeTab === 'home'">
       <div class="management-section">

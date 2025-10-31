@@ -59,45 +59,86 @@ const routes = [
   {
     path: '/admin/login',
     name: 'AdminLogin',
-    component: AdminLogin,
+    component: ()=> AdminLogin,
   },
   {
     path: '/admin',
     name: 'Admin',
-    redirect: () => {
-      // 如果已登录，重定向到仪表盘，否则重定向到登录页
-      return isAuthenticated() ? '/admin/dashboard' : '/admin/login';
-    }
+    component: () => import('@/views/admin/index.vue'),
+    children: [
+        {
+        path: '',
+        redirect: '/admin/dashboard'
+      },
+      {
+        path: 'dashboard',
+        name: 'AdminDashboard',
+        component: AdminDashboard,
+        meta: { requiresAuth: true }
+      },
+      {
+        path: 'categories',
+        name: 'CategoryManagement',
+        component: CategoryManagement,
+        meta: { requiresAuth: true }
+      },
+      {
+        path: 'account',
+        name: 'AccountManagement',
+        component: AccountManagement,
+        meta: { requiresAuth: true }
+      },
+      {
+        path: 'website',
+        name: 'WebsiteSettings',
+        component: WebsiteSettings,
+        meta: { requiresAuth: true }
+      },
+      {
+        path: 'category/:id',
+        name: 'CategoryDetails',
+        component: CategoryDetails,
+        meta: { requiresAuth: true }
+      },
+    ]
   },
-  {
-    path: '/admin/dashboard',
-    name: 'AdminDashboard',
-    component: AdminDashboard,
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/admin/categories',
-    name: 'CategoryManagement',
-    component: CategoryManagement,
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/admin/account',
-    name: 'AccountManagement',
-    component: AccountManagement,
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/admin/website',
-    name: 'WebsiteSettings',
-    component: WebsiteSettings,
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/category/:id',
-    name: 'CategoryDetails',
-    component: CategoryDetails,
-  },
+//   {
+//     path: '/admin',
+//     name: 'Admin',
+//     redirect: () => {
+//       // 如果已登录，重定向到仪表盘，否则重定向到登录页
+//       return isAuthenticated() ? '/admin/dashboard' : '/admin/login';
+//     }
+//   },
+//   {
+//     path: '/admin/dashboard',
+//     name: 'AdminDashboard',
+//     component: AdminDashboard,
+//     meta: { requiresAuth: true }
+//   },
+//   {
+//     path: '/admin/categories',
+//     name: 'CategoryManagement',
+//     component: CategoryManagement,
+//     meta: { requiresAuth: true }
+//   },
+//   {
+//     path: '/admin/account',
+//     name: 'AccountManagement',
+//     component: AccountManagement,
+//     meta: { requiresAuth: true }
+//   },
+//   {
+//     path: '/admin/website',
+//     name: 'WebsiteSettings',
+//     component: WebsiteSettings,
+//     meta: { requiresAuth: true }
+//   },
+//   {
+//     path: '/category/:id',
+//     name: 'CategoryDetails',
+//     component: CategoryDetails,
+//   },
 ];
 
 const router = createRouter({

@@ -97,6 +97,7 @@ import { useRouter } from 'vue-router';
 import { previewImages } from 'hevue-img-preview/v3';
 import Footer from '@/components/Footer.vue';
 import RechargeBenefitsModal from '@/components/RechargeBenefitsModal.vue';
+import CategoryDetailModal from '@/components/CategoryDetailModal.vue';
 import { homeAPI, categoryAPI, websiteAPI } from '@/api/index';
 
 const router = useRouter();

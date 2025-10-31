@@ -1,12 +1,12 @@
 <template>
   <div class="category-management">
-    <h1>阿良电竞价格表管理后台</h1>
+    <!-- <h1>阿良电竞价格表管理后台</h1>
     
     <div class="navigation">
       <router-link to="/admin/dashboard" class="nav-item">首页管理</router-link>
       <router-link to="/admin/categories" class="nav-item active">品类管理</router-link>
       <button @click="handleLogout" class="logout-button">退出登录</button>
-    </div>
+    </div> -->
     
     <div class="management-section">
       <h2>品类列表</h2>
