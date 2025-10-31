@@ -5,6 +5,7 @@
     <div class="navigation">
       <router-link to="/admin/dashboard" class="nav-item">首页管理</router-link>
       <router-link to="/admin/categories" class="nav-item active">品类管理</router-link>
+      <button @click="handleLogout" class="logout-button">退出登录</button>
     </div>
     
     <div class="management-section">
@@ -159,6 +160,7 @@ import { ref, reactive, onBeforeUnmount, onMounted } from 'vue'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 import '@wangeditor/editor/dist/css/style.css'
 import { categoryAPI } from '@/api/index'
+import { useRouter } from 'vue-router'
 
 // 编辑器实例
 const editorRef = ref()
@@ -205,6 +207,9 @@ const detailImageInput = ref<HTMLInputElement | null>(null) // 添加详情长�
 // 消息提示
 const message = ref('')
 const isError = ref(false)
+
+// 路由
+const router = useRouter()
 
 // 添加新品类
 const addCategory = () => {
@@ -381,6 +386,16 @@ const fetchCategories = async () => {
   }
 }
 
+// 退出登录
+const handleLogout = () => {
+  // 清除本地存储的token和用户信息
+  localStorage.removeItem('adminToken');
+  localStorage.removeItem('adminUser');
+  
+  // 跳转到登录页
+  router.push('/admin/login');
+};
+
 // 编辑器创建回调
 const handleCreated = (editor: any) => {
   editorRef.value = editor
@@ -442,6 +457,20 @@ onBeforeUnmount(() => {
     
     &:hover:not(.active) {
       color: #333;
+    }
+  }
+  
+  .logout-button {
+    margin-left: auto;
+    background: #f56c6c;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    
+    &:hover {
+      background: #f78989;
     }
   }
 }
@@ -729,6 +758,15 @@ h2 {
   .modal-content {
     width: 95%;
     padding: 20px;
+  }
+  
+  .navigation {
+    flex-wrap: wrap;
+    
+    .logout-button {
+      margin-left: 0;
+      margin-top: 10px;
+    }
   }
 }
 </style>

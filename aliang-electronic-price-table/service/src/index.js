@@ -9,6 +9,7 @@ const { initDatabase, getDatabase } = require('./config/database');
 // 路由
 const homeRoutes = require('./routes/homeRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
+const authRoutes = require('./routes/authRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -21,6 +22,7 @@ app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 // API路由
 app.use('/api/home', homeRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use('/api/auth', authRoutes);
 
 // 初始化数据库并启动服务器
 initDatabase().then(() => {

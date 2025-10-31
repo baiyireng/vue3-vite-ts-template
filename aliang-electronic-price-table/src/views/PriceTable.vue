@@ -78,18 +78,8 @@
             <Footer />
         </main>
 
-        <!-- 预存须知模态框组件 -->
-        <RechargeBenefitsModal
-            :visible="isRechargeBenefitsModalVisible"
-            @close="isRechargeBenefitsModalVisible = false"
-        />
-
-        <!-- 品类详情模态框组件 -->
-        <CategoryDetailModal
-            :visible="isCategoryDetailModalVisible"
-            :category-id="selectedCategoryId"
-            @close="isCategoryDetailModalVisible = false"
-        />
+        <!-- 模态框组件 -->
+        <RechargeBenefitsModal :visible="isModalVisible" @close="isModalVisible = false" />
     </div>
 </template>
 
@@ -99,13 +89,10 @@ import { useRouter } from 'vue-router';
 import { previewImages } from 'hevue-img-preview/v3';
 import Footer from '@/components/Footer.vue';
 import RechargeBenefitsModal from '@/components/RechargeBenefitsModal.vue';
-import CategoryDetailModal from '@/components/CategoryDetailModal.vue';
 import { homeAPI, categoryAPI } from '@/api/index';
 
 const router = useRouter();
-const isRechargeBenefitsModalVisible = ref(false);
-const isCategoryDetailModalVisible = ref(false);
-const selectedCategoryId = ref<number | null>(null);
+const isModalVisible = ref(false);
 
 // 可编辑的标题
 const categorySectionTitle = ref('阿良电竞各品类价格表（点击图标查看）');
@@ -162,12 +149,10 @@ const handleClick = (img) => {
 // 导航方法
 const navigateToCategory = (category: any) => {
     if (isMobile()) {
-        // 移动端跳转到品类详情页面
+        // 跳转到品类详情页面
         router.push({ name: 'CategoryDetails', params: { id: category.id.toString() } });
     } else {
-        // PC端显示品类详情模态框
-        selectedCategoryId.value = category.id;
-        isCategoryDetailModalVisible.value = true;
+        isModalVisible.value = true; // PC端显示模态框
     }
 };
 

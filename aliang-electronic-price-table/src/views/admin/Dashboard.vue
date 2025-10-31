@@ -5,6 +5,7 @@
     <div class="navigation">
       <router-link to="/admin/dashboard" class="nav-item active">首页管理</router-link>
       <router-link to="/admin/categories" class="nav-item">品类管理</router-link>
+      <button @click="handleLogout" class="logout-button">退出登录</button>
     </div>
     
     <div class="management-section">
@@ -88,6 +89,7 @@ import { ref, reactive, onBeforeUnmount, onMounted } from 'vue'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 import '@wangeditor/editor/dist/css/style.css'
 import { homeAPI } from '@/api/index'
+import { useRouter } from 'vue-router'
 
 // 编辑器实例，必须用 shallowRef
 const editorRef = ref()
@@ -129,6 +131,9 @@ const imageInputRefs = ref<{[key: string]: HTMLInputElement}>({})
 // 消息提示
 const message = ref('')
 const isError = ref(false)
+
+// 路由
+const router = useRouter()
 
 // 设置图片输入框引用
 const setImageInputRef = (el: HTMLInputElement | null, name: string) => {
@@ -237,6 +242,16 @@ const showMessage = (msg: string, error: boolean = false) => {
   }, 3000);
 };
 
+// 退出登录
+const handleLogout = () => {
+  // 清除本地存储的token和用户信息
+  localStorage.removeItem('adminToken');
+  localStorage.removeItem('adminUser');
+  
+  // 跳转到登录页
+  router.push('/admin/login');
+};
+
 // 组件挂载时获取数据
 onMounted(() => {
   fetchData();
@@ -275,6 +290,20 @@ onBeforeUnmount(() => {
     
     &:hover:not(.active) {
       color: #333;
+    }
+  }
+  
+  .logout-button {
+    margin-left: auto;
+    background: #f56c6c;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    
+    &:hover {
+      background: #f78989;
     }
   }
 }
@@ -406,6 +435,15 @@ h2 {
 @media (max-width: 768px) {
   .image-management {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+  
+  .navigation {
+    flex-wrap: wrap;
+    
+    .logout-button {
+      margin-left: 0;
+      margin-top: 10px;
+    }
   }
 }
 </style>

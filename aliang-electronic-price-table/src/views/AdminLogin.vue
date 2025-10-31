@@ -27,6 +27,16 @@
             placeholder="请输入密码"
             required
           />
+          <div class="password-requirements" v-if="showPasswordRequirements">
+            <p>密码要求：</p>
+            <ul>
+              <li :class="{ valid: hasLowerCase }">至少一个小写字母</li>
+              <li :class="{ valid: hasUpperCase }">至少一个大写字母</li>
+              <li :class="{ valid: hasNumber }">至少一个数字</li>
+              <li :class="{ valid: hasSpecialChar }">至少一个特殊字符</li>
+              <li :class="{ valid: isLongEnough }">至少8个字符</li>
+            </ul>
+          </div>
         </div>
         
         <div class="form-group">
@@ -39,22 +49,42 @@
       <div v-if="error" class="error-message">
         {{ error }}
       </div>
+      
+      <div class="login-hint">
+        <p>提示：演示账号 admin / Admin@123</p>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue';
+import { ref, reactive, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const loading = ref(false);
 const error = ref('');
+const showPasswordRequirements = ref(false);
 
 const loginForm = reactive({
   username: '',
   password: ''
 });
+
+// 密码强度检查
+const hasLowerCase = computed(() => /[a-z]/.test(loginForm.password));
+const hasUpperCase = computed(() => /[A-Z]/.test(loginForm.password));
+const hasNumber = computed(() => /\d/.test(loginForm.password));
+const hasSpecialChar = computed(() => /[@$!%*?&]/.test(loginForm.password));
+const isLongEnough = computed(() => loginForm.password.length >= 8);
+
+// 当密码输入时显示密码要求
+watch(
+  () => loginForm.password,
+  (newPassword) => {
+    showPasswordRequirements.value = newPassword.length > 0;
+  }
+);
 
 const handleLogin = async () => {
   if (!loginForm.username || !loginForm.password) {
@@ -62,23 +92,43 @@ const handleLogin = async () => {
     return;
   }
   
+  // 基本的密码强度检查（仅用于提示，实际验证在后端进行）
+  if (!isLongEnough.value) {
+    error.value = '密码至少需要8个字符';
+    return;
+  }
+  
   loading.value = true;
   error.value = '';
   
   try {
-    // 模拟登录请求
-    // 实际项目中这里会调用后端API进行验证
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // 调用后端登录接口
+    const response = await fetch('http://localhost:3000/api/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        username: loginForm.username,
+        password: loginForm.password
+      })
+    });
     
-    // 简单的用户名密码验证（实际项目中应调用后端接口）
-    if (loginForm.username === 'admin' && loginForm.password === '123456') {
-      // 登录成功，跳转到管理后台首页
+    const data = await response.json();
+    
+    if (data.success) {
+      // 登录成功，保存token到localStorage
+      localStorage.setItem('adminToken', data.token);
+      localStorage.setItem('adminUser', JSON.stringify(data.user));
+      
+      // 跳转到管理后台首页
       router.push('/admin/dashboard');
     } else {
-      error.value = '用户名或密码错误';
+      error.value = data.message || '登录失败';
     }
   } catch (err) {
-    error.value = '登录失败，请稍后重试';
+    error.value = '登录失败，请检查网络连接';
+    console.error('Login error:', err);
   } finally {
     loading.value = false;
   }
@@ -146,6 +196,41 @@ const handleLogin = async () => {
       }
     }
     
+    .password-requirements {
+      margin-top: 10px;
+      padding: 10px;
+      background-color: #f8f9fa;
+      border-radius: 4px;
+      font-size: 12px;
+      
+      p {
+        margin: 0 0 5px 0;
+        font-weight: bold;
+      }
+      
+      ul {
+        margin: 0;
+        padding-left: 20px;
+        
+        li {
+          color: #6c757d;
+          
+          &.valid {
+            color: #28a745;
+            
+            &:before {
+              content: "✓ ";
+            }
+          }
+          
+          &:before {
+            content: "✗ ";
+            color: #dc3545;
+          }
+        }
+      }
+    }
+    
     .login-button {
       width: 100%;
       padding: 12px;
@@ -174,6 +259,13 @@ const handleLogin = async () => {
   text-align: center;
   margin-top: 15px;
   font-size: 14px;
+}
+
+.login-hint {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 12px;
+  color: #6c757d;
 }
 
 @media (max-width: 480px) {
