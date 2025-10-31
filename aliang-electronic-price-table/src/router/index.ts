@@ -7,6 +7,7 @@ import AdminDashboard from '@/views/admin/Dashboard.vue';
 import CategoryManagement from '@/views/admin/CategoryManagement.vue';
 import AccountManagement from '@/views/admin/AccountManagement.vue';
 import CategoryDetails from '@/views/CategoryDetails.vue';
+import WebsiteSettings from '@/views/admin/WebsiteSettings.vue';
 
 // 检查用户是否已登录（基于本地存储）
 const isAuthenticated = () => {
@@ -87,6 +88,12 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/admin/website',
+    name: 'WebsiteSettings',
+    component: WebsiteSettings,
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/category/:id',
     name: 'CategoryDetails',
     component: CategoryDetails,
@@ -100,29 +107,39 @@ const router = createRouter({
 
 // 添加路由守卫
 router.beforeEach(async (to, from, next) => {
-  // 检查路由是否需要认证
-  if (to.meta.requiresAuth) {
-    // 检查用户是否已登录
-    if (isAuthenticated()) {
-      // 验证token有效性
-      const tokenValid = await verifyToken();
-      if (tokenValid) {
-        // Token有效，允许访问
-        next();
-      } else {
-        // Token无效，清除本地存储并重定向到登录页
-        localStorage.removeItem('adminToken');
-        localStorage.removeItem('adminUser');
-        next('/admin/login');
-      }
-    } else {
-      // 未登录，重定向到登录页
-      next('/admin/login');
-    }
-  } else {
-    // 不需要认证的路由，直接访问
-    next();
+  // 定义公开页面
+  const publicPages = ['/admin/login'];
+  const authRequired = !publicPages.includes(to.path);
+  const loggedIn = isAuthenticated();
+
+  // 尝试从URL参数获取token
+  const urlParams = new URLSearchParams(window.location.search);
+  const tokenFromUrl = urlParams.get('token');
+
+  if (tokenFromUrl) {
+    localStorage.setItem('adminToken', tokenFromUrl);
+    // 移除URL中的token参数
+    window.history.replaceState({}, document.title, window.location.pathname);
+    return next('/admin/dashboard');
   }
+
+  // 如果访问需要认证的页面但未登录
+  if (authRequired && !loggedIn) {
+    return next('/admin/login');
+  }
+
+  // 如果是需要认证的页面，验证 token 有效性
+  if (authRequired && loggedIn) {
+    const tokenValid = await verifyToken();
+    if (!tokenValid) {
+      localStorage.removeItem('adminToken');
+      localStorage.removeItem('adminUser');
+      return next('/admin/login');
+    }
+  }
+
+  // 允许访问
+  next();
 });
 
 export default router;

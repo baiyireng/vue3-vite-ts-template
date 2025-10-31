@@ -81,6 +81,14 @@
         <!-- 模态框组件 -->
         <RechargeBenefitsModal :visible="isModalVisible" @close="isModalVisible = false" />
     </div>
+
+    <!-- 品类详情模态框组件 -->
+    <CategoryDetailModal 
+      :visible="isCategoryDetailModalVisible" 
+      :category-id="selectedCategoryId"
+      :categoryData="selectedCategory"
+      @close="isCategoryDetailModalVisible = false" 
+    />
 </template>
 
 <script setup lang="ts">
@@ -89,10 +97,14 @@ import { useRouter } from 'vue-router';
 import { previewImages } from 'hevue-img-preview/v3';
 import Footer from '@/components/Footer.vue';
 import RechargeBenefitsModal from '@/components/RechargeBenefitsModal.vue';
-import { homeAPI, categoryAPI } from '@/api/index';
+import { homeAPI, categoryAPI, websiteAPI } from '@/api/index';
 
 const router = useRouter();
 const isModalVisible = ref(false);
+const isRechargeBenefitsModalVisible = ref(false);
+const isCategoryDetailModalVisible = ref(false);
+const selectedCategoryId = ref<number | null>(null);
+const selectedCategory = ref<any | null>(null);
 
 // 可编辑的标题
 const categorySectionTitle = ref('阿良电竞各品类价格表（点击图标查看）');
@@ -124,7 +136,7 @@ const icon6 = new URL('@/assets/images/icon6.png', import.meta.url).href;
 const icon7 = new URL('@/assets/images/icon7.png', import.meta.url).href;
 
 // 分类数据
-const categories = ref([
+const defaultCategories = [
     { id: 1, icon: icon1, name: '预存须知' },
     { id: 2, icon: icon2, name: '三角洲行动...' },
     { id: 3, icon: icon3, name: '三角洲护航...' },
@@ -132,7 +144,8 @@ const categories = ref([
     { id: 5, icon: icon5, name: '永劫无间' },
     { id: 6, icon: icon6, name: '无畏契约' },
     { id: 7, icon: icon7, name: '其他游戏' },
-]);
+];
+const categories = ref([]);
 
 // 检测是否为移动设备
 const isMobile = () => {
@@ -149,16 +162,38 @@ const handleClick = (img) => {
 // 导航方法
 const navigateToCategory = (category: any) => {
     if (isMobile()) {
-        // 跳转到品类详情页面
-        router.push({ name: 'CategoryDetails', params: { id: category.id.toString() } });
+      // 移动端跳转到品类详情页面
+      router.push({ name: 'CategoryDetails', params: { id: category.id.toString() } });
     } else {
-        isModalVisible.value = true; // PC端显示模态框
+      // PC端显示品类详情模态框
+      selectedCategoryId.value = category.id;
+      selectedCategory.value = category;
+      console.log('category',category);
+      
+      isCategoryDetailModalVisible.value = true;
     }
 };
 
 // 从后端获取数据
 const fetchData = async () => {
     try {
+        // 获取网站设置
+        const websiteResponse = await websiteAPI.getSettings();
+        if (websiteResponse.title) {
+            document.title = websiteResponse.title;
+        }
+        
+        // 如果有favicon，更新页面favicon
+        if (websiteResponse.favicon) {
+            let favicon = document.querySelector("link[rel='icon']");
+            if (!favicon) {
+                favicon = document.createElement('link');
+                favicon.rel = 'icon';
+                document.head.appendChild(favicon);
+            }
+            favicon.href = websiteResponse.favicon;
+        }
+
         // 获取首页图片
         const imagesResponse = await homeAPI.getImages();
         if (imagesResponse.images) {
@@ -194,10 +229,13 @@ const fetchData = async () => {
         const categoriesResponse = await categoryAPI.getAll();
         if (categoriesResponse.categories && categoriesResponse.categories.length > 0) {
             categories.value = categoriesResponse.categories.map((category: any) => ({
+                ...category,
                 id: category.id,
                 icon: category.icon || defaultIcon,
                 name: category.name,
             }));
+        }else{
+            categories.value = defaultCategories;
         }
     } catch (error) {
         console.error('获取数据失败:', error);

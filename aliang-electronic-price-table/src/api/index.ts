@@ -58,6 +58,27 @@ export const homeAPI = {
   },
 };
 
+// 网站设置相关API
+export const websiteAPI = {
+  // 获取网站设置
+  getSettings: async () => {
+    const response = await fetch(`${API_BASE_URL}/website`);
+    return response.json();
+  },
+
+  // 更新网站设置
+  updateSettings: async (settings: { title: string; favicon: string }) => {
+    const response = await fetch(`${API_BASE_URL}/website`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(settings),
+    });
+    return response.json();
+  },
+};
+
 // 品类相关API
 export const categoryAPI = {
   // 获取所有品类
@@ -105,13 +126,13 @@ export const categoryAPI = {
   },
 
   // 更新品类排序
-  updateSortOrder: async (id: number, sortOrder: number) => {
+  updateSortOrder: async (id: number, sort_order: number) => {
     const response = await fetch(`${API_BASE_URL}/categories/${id}/sort-order`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ sort_order: sortOrder }),
+      body: JSON.stringify({ sort_order }),
     });
     return response.json();
   },

@@ -6,7 +6,7 @@
             <!-- 说明 -->
             <div class="title-container">
                 <h1>{{ category?.name }}</h1>
-                <p>2025-06-14 15:18</p>
+                <p>{{ category?.updated_at }}</p>
             </div>
         </header>
 

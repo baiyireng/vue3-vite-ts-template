@@ -7,6 +7,7 @@ const fs = require('fs');
 const homeRoutes = require('./routes/homeRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const userRoutes = require('./routes/userRoutes'); // 添加用户路由
+const websiteRoutes = require('./routes/websiteRoutes'); // 添加网站设置路由
 
 // 数据库初始化
 const { initDatabase, saveDatabase } = require('./config/database');
@@ -31,6 +32,7 @@ initDatabase().then(() => {
 app.use('/api/home', homeRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/auth', userRoutes); // 添加用户路由
+app.use('/api/website', websiteRoutes); // 添加网站设置路由
 
 // 提供图片访问服务
 app.use('/images', express.static(path.join(__dirname, 'data/images')));

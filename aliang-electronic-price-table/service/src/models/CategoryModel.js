@@ -5,7 +5,7 @@ class CategoryModel {
   static getAllCategories(callback) {
     try {
       const db = getDatabase();
-      const stmt = db.prepare('SELECT * FROM categories ORDER BY sort_order ASC');
+      const stmt = db.prepare('SELECT *, strftime(\'%Y-%m-%d %H:%M:%S\', created_at) as created_at, strftime(\'%Y-%m-%d %H:%M:%S\', updated_at) as updated_at FROM categories ORDER BY sort_order ASC');
       // 使用正确的sql.js API获取结果
       const result = [];
       stmt.bind();
@@ -22,7 +22,7 @@ class CategoryModel {
   static getCategoryById(id, callback) {
     try {
       const db = getDatabase();
-      const stmt = db.prepare('SELECT * FROM categories WHERE id = ?');
+      const stmt = db.prepare('SELECT *, strftime(\'%Y-%m-%d %H:%M:%S\', created_at) as created_at, strftime(\'%Y-%m-%d %H:%M:%S\', updated_at) as updated_at FROM categories WHERE id = ?');
       stmt.bind([id]);
       const result = stmt.step() ? stmt.getAsObject() : null;
       callback(null, result);
@@ -35,7 +35,7 @@ class CategoryModel {
   static createCategory(category, callback) {
     try {
       const db = getDatabase();
-      const stmt = db.prepare('INSERT INTO categories (name, description, icon, detail_image, details, notice, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?)');
+      const stmt = db.prepare('INSERT INTO categories (name, description, icon, detail_image, details, notice, sort_order, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, datetime(\'now\'), datetime(\'now\'))');
       stmt.run([
         category.name,
         category.description,
@@ -60,7 +60,7 @@ class CategoryModel {
   static updateCategory(id, category, callback) {
     try {
       const db = getDatabase();
-      const stmt = db.prepare('UPDATE categories SET name = ?, description = ?, icon = ?, detail_image = ?, details = ?, notice = ?, sort_order = ? WHERE id = ?');
+      const stmt = db.prepare('UPDATE categories SET name = ?, description = ?, icon = ?, detail_image = ?, details = ?, notice = ?, sort_order = ?, updated_at = datetime(\'now\') WHERE id = ?');
       stmt.run([
         category.name,
         category.description,

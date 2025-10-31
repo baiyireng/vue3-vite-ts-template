@@ -3,84 +3,88 @@
     <h1>阿良电竞价格表管理后台</h1>
     
     <div class="navigation">
-      <router-link to="/admin/dashboard" class="nav-item active">首页管理</router-link>
-      <router-link to="/admin/categories" class="nav-item">品类管理</router-link>
-      <router-link to="/admin/account" class="nav-item">账号管理</router-link>
+      <router-link to="/admin/dashboard" class="nav-item" :class="{ active: activeTab === 'home' }" @click="activeTab = 'home'">首页管理</router-link>
+      <router-link to="/admin/categories" class="nav-item" :class="{ active: activeTab === 'categories' }" @click="activeTab = 'categories'">品类管理</router-link>
+      <router-link to="/admin/account" class="nav-item" :class="{ active: activeTab === 'account' }" @click="activeTab = 'account'">账号管理</router-link>
+      <router-link to="/admin/website" class="nav-item" :class="{ active: activeTab === 'website' }" @click="activeTab = 'website'">网站设置</router-link>
       <button @click="handleLogout" class="logout-button">退出登录</button>
     </div>
     
-    <div class="management-section">
-      <h2>图片资源管理</h2>
-      <div class="image-management">
-        <div class="image-item" v-for="image in images" :key="image.name">
-          <label>{{ image.label }}</label>
-          <div class="image-preview" @click="selectImage(image.name)">
-            <img :src="image.url" :alt="image.label" v-if="image.url" />
-            <div class="no-image" v-else>点击上传图片</div>
+    <!-- 首页管理 -->
+    <div v-if="activeTab === 'home'">
+      <div class="management-section">
+        <h2>图片资源管理</h2>
+        <div class="image-management">
+          <div class="image-item" v-for="image in images" :key="image.name">
+            <label>{{ image.label }}</label>
+            <div class="image-preview" @click="selectImage(image.name)">
+              <img :src="image.url" :alt="image.label" v-if="image.url" />
+              <div class="no-image" v-else>点击上传图片</div>
+            </div>
+            <input 
+              type="file" 
+              :ref="el => setImageInputRef(el, image.name)"
+              @change="handleImageUpload($event, image.name)"
+              accept="image/*"
+              style="display: none"
+            />
           </div>
-          <input 
-            type="file" 
-            :ref="el => setImageInputRef(el, image.name)"
-            @change="handleImageUpload($event, image.name)"
-            accept="image/*"
-            style="display: none"
+        </div>
+      </div>
+
+      <div class="management-section">
+        <h2>标题文本管理</h2>
+        <div class="title-management">
+          <div class="form-group">
+            <label for="categorySectionTitle">品类价格表标题</label>
+            <input 
+              id="categorySectionTitle" 
+              v-model="titles.categorySection" 
+              type="text" 
+              class="title-input"
+              placeholder="请输入品类价格表标题"
+            />
+          </div>
+          
+          <div class="form-group">
+            <label for="orderSectionTitle">下单说明标题</label>
+            <input 
+              id="orderSectionTitle" 
+              v-model="titles.orderSection" 
+              type="text" 
+              class="title-input"
+              placeholder="请输入下单说明标题"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="management-section">
+        <h2>下单须知文本管理</h2>
+        <div style="border: 1px solid #ccc; margin-top: 20px;">
+          <Toolbar
+            style="border-bottom: 1px solid #ccc"
+            :editor="editorRef"
+            :defaultConfig="toolbarConfig"
+            :mode="mode"
+          />
+          <Editor
+            style="height: 300px; overflow-y: hidden;"
+            v-model="orderNoticeText"
+            :defaultConfig="editorConfig"
+            :mode="mode"
+            @onCreated="handleCreated"
           />
         </div>
       </div>
-    </div>
 
-    <div class="management-section">
-      <h2>标题文本管理</h2>
-      <div class="title-management">
-        <div class="form-group">
-          <label for="categorySectionTitle">品类价格表标题</label>
-          <input 
-            id="categorySectionTitle" 
-            v-model="titles.categorySection" 
-            type="text" 
-            class="title-input"
-            placeholder="请输入品类价格表标题"
-          />
-        </div>
-        
-        <div class="form-group">
-          <label for="orderSectionTitle">下单说明标题</label>
-          <input 
-            id="orderSectionTitle" 
-            v-model="titles.orderSection" 
-            type="text" 
-            class="title-input"
-            placeholder="请输入下单说明标题"
-          />
-        </div>
+      <div class="form-actions">
+        <button @click="saveChanges" class="save-button" :disabled="loading">
+          {{ loading ? '保存中...' : '保存更改' }}
+        </button>
       </div>
     </div>
-
-    <div class="management-section">
-      <h2>下单须知文本管理</h2>
-      <div style="border: 1px solid #ccc; margin-top: 20px;">
-        <Toolbar
-          style="border-bottom: 1px solid #ccc"
-          :editor="editorRef"
-          :defaultConfig="toolbarConfig"
-          :mode="mode"
-        />
-        <Editor
-          style="height: 300px; overflow-y: hidden;"
-          v-model="orderNoticeText"
-          :defaultConfig="editorConfig"
-          :mode="mode"
-          @onCreated="handleCreated"
-        />
-      </div>
-    </div>
-
-    <div class="form-actions">
-      <button @click="saveChanges" class="save-button" :disabled="loading">
-        {{ loading ? '保存中...' : '保存更改' }}
-      </button>
-    </div>
-
+    
     <div v-if="message" class="message" :class="{ error: isError }">
       {{ message }}
     </div>
@@ -94,6 +98,9 @@ import '@wangeditor/editor/dist/css/style.css'
 import { homeAPI } from '@/api/index'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
+
+// 当前激活的标签页
+const activeTab = ref('home')
 
 // 编辑器实例，必须用 shallowRef
 const editorRef = ref()
