@@ -5,6 +5,7 @@
     <div class="navigation">
       <router-link to="/admin/dashboard" class="nav-item active">首页管理</router-link>
       <router-link to="/admin/categories" class="nav-item">品类管理</router-link>
+      <router-link to="/admin/account" class="nav-item">账号管理</router-link>
       <button @click="handleLogout" class="logout-button">退出登录</button>
     </div>
     
