@@ -28,6 +28,31 @@
     </div>
 
     <div class="management-section">
+      <h2>标题文本管理</h2>
+      <div class="title-management">
+        <div class="form-group">
+          <label for="categorySectionTitle">品类价格表标题</label>
+          <input 
+            id="categorySectionTitle" 
+            v-model="titles.categorySection" 
+            type="text" 
+            class="title-input"
+          />
+        </div>
+        
+        <div class="form-group">
+          <label for="orderSectionTitle">下单说明标题</label>
+          <input 
+            id="orderSectionTitle" 
+            v-model="titles.orderSection" 
+            type="text" 
+            class="title-input"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="management-section">
       <h2>下单须知文本管理</h2>
       <div style="border: 1px solid #ccc; margin-top: 20px;">
         <Toolbar
@@ -82,18 +107,17 @@ const editorConfig = {
   }
 }
 
-// 图片数据
+// 标题文本
+const titles = reactive({
+  categorySection: '阿良电竞各品类价格表（点击图标查看）',
+  orderSection: '阿良电竞 | 下单价格'
+})
+
+// 图片数据（仅保留首页相关图片）
 const images = reactive([
   { id: 'banner', label: '首页横幅图片', url: new URL('@/assets/images/banner.png', import.meta.url).href },
   { id: 'orderNotice', label: '下单须知图片', url: new URL('@/assets/images/order_notice.png', import.meta.url).href },
   { id: 'contactInfo', label: '联系方式图片', url: new URL('@/assets/images/contact_info.png', import.meta.url).href },
-  { id: 'icon1', label: '预存须知图标', url: new URL('@/assets/images/icon1.png', import.meta.url).href },
-  { id: 'icon2', label: '三角洲行动图标', url: new URL('@/assets/images/icon2.png', import.meta.url).href },
-  { id: 'icon3', label: '三角洲护航图标', url: new URL('@/assets/images/icon3.png', import.meta.url).href },
-  { id: 'icon4', label: '三角洲炸单图标', url: new URL('@/assets/images/icon4.png', import.meta.url).href },
-  { id: 'icon5', label: '永劫无间图标', url: new URL('@/assets/images/icon5.png', import.meta.url).href },
-  { id: 'icon6', label: '无畏契约图标', url: new URL('@/assets/images/icon6.png', import.meta.url).href },
-  { id: 'icon7', label: '其他游戏图标', url: new URL('@/assets/images/icon7.png', import.meta.url).href },
 ])
 
 // 图片上传输入框引用

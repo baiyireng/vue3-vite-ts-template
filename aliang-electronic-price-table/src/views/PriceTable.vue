@@ -11,7 +11,7 @@
     <!-- 主体 -->
     <main class="main">
       <section class="category-section cardBorder">
-        <h2 class="widget-header">阿良电竞各品类价格表（点击图标查看）</h2>
+        <h2 class="widget-header">{{ categorySectionTitle }}</h2>
         <ul class="category-list">
           <li
             v-for="(item, index) in categories"
@@ -31,7 +31,7 @@
 
       <!-- 下单价格 -->
       <section class="order-price cardBorder">
-        <h3 class="widget-header">阿良电竞 | 下单价格</h3>
+        <h3 class="widget-header">{{ orderSectionTitle }}</h3>
         <div class="order-price-wrapper">
           <p>尊敬的贵宾，欢迎来到阿良电竞端游价格表！</p>
           <p>
@@ -69,6 +69,10 @@ import RechargeBenefitsModal from '@/components/RechargeBenefitsModal.vue';
 
 const router = useRouter();
 const isModalVisible = ref(false);
+
+// 可编辑的标题
+const categorySectionTitle = ref('阿良电竞各品类价格表（点击图标查看）');
+const orderSectionTitle = ref('阿良电竞 | 下单价格');
 
 // 使用 import.meta.url 动态导入图片资源
 const bannerImg = new URL('@/assets/images/banner.png', import.meta.url).href;

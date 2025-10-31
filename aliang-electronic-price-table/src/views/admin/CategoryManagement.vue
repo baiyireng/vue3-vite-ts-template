@@ -83,20 +83,40 @@
           </div>
           
           <div class="form-group">
-            <label for="categoryDetails">详情内容</label>
+            <label>详情长图（可选）</label>
+            <div class="image-preview" @click="selectDetailImage">
+              <img 
+                :src="editingCategory.detailImage" 
+                alt="详情长图" 
+                v-if="editingCategory.detailImage" 
+                class="preview-icon"
+              />
+              <div class="no-image" v-else>点击上传详情长图</div>
+            </div>
+            <input 
+              type="file" 
+              ref="detailImageInput"
+              @change="handleDetailImageUpload"
+              accept="image/*"
+              style="display: none"
+            />
+          </div>
+          
+          <div class="form-group">
+            <label for="categoryNotice">注意事项（富文本）</label>
             <div style="border: 1px solid #ccc; margin-top: 10px;">
               <Toolbar
                 style="border-bottom: 1px solid #ccc"
-                :editor="editorRef"
+                :editor="noticeEditorRef"
                 :defaultConfig="toolbarConfig"
                 :mode="mode"
               />
               <Editor
-                style="height: 300px; overflow-y: hidden;"
-                v-model="editingCategory.details"
+                style="height: 200px; overflow-y: hidden;"
+                v-model="editingCategory.notice"
                 :defaultConfig="editorConfig"
                 :mode="mode"
-                @onCreated="handleCreated"
+                @onCreated="handleNoticeCreated"
               />
             </div>
           </div>
@@ -122,6 +142,7 @@ import '@wangeditor/editor/dist/css/style.css'
 
 // 编辑器实例
 const editorRef = ref()
+const noticeEditorRef = ref()
 
 const mode = ref('default')
 
@@ -130,7 +151,7 @@ const toolbarConfig = {}
 
 // 编辑器配置
 const editorConfig = { 
-  placeholder: '请输入详情内容...',
+  placeholder: '请输入内容...',
   MENU_CONF: {
     uploadImage: {
       // 自定义图片上传
@@ -145,49 +166,56 @@ const categories = ref([
     name: '预存须知', 
     icon: new URL('@/assets/images/icon1.png', import.meta.url).href,
     description: '预存须知相关说明',
-    details: '<p>这里是预存须知的详细内容</p>'
+    detailImage: '', // 添加详情长图字段
+    notice: '<ul><li>个存只可消费固定陪</li><li>店存可转为个存超过520r，赠送陪陪微信*1</li><li>个存转店存需要扣除20%手续费</li><li>陪陪个存清空自愿保留绑板微信</li><li>备注：存单志择退款，退款需扣除20%服务费</li></ul>' // 添加注意事项字段
   },
   { 
     id: '2', 
     name: '三角洲行动...', 
     icon: new URL('@/assets/images/icon2.png', import.meta.url).href,
     description: '三角洲行动相关服务',
-    details: '<p>这里是三角洲行动的详细内容</p>'
+    detailImage: '',
+    notice: ''
   },
   { 
     id: '3', 
     name: '三角洲护航...', 
     icon: new URL('@/assets/images/icon3.png', import.meta.url).href,
     description: '三角洲护航相关服务',
-    details: '<p>这里是三角洲护航的详细内容</p>'
+    detailImage: '',
+    notice: ''
   },
   { 
     id: '4', 
     name: '三角洲炸单...', 
     icon: new URL('@/assets/images/icon4.png', import.meta.url).href,
     description: '三角洲炸单相关服务',
-    details: '<p>这里是三角洲炸单的详细内容</p>'
+    detailImage: '',
+    notice: ''
   },
   { 
     id: '5', 
     name: '永劫无间', 
     icon: new URL('@/assets/images/icon5.png', import.meta.url).href,
     description: '永劫无间相关服务',
-    details: '<p>这里是永劫无间的详细内容</p>'
+    detailImage: '',
+    notice: ''
   },
   { 
     id: '6', 
     name: '无畏契约', 
     icon: new URL('@/assets/images/icon6.png', import.meta.url).href,
     description: '无畏契约相关服务',
-    details: '<p>这里是无畏契约的详细内容</p>'
+    detailImage: '',
+    notice: ''
   },
   { 
     id: '7', 
     name: '其他游戏', 
     icon: new URL('@/assets/images/icon7.png', import.meta.url).href,
     description: '其他游戏相关服务',
-    details: '<p>这里是其他游戏的详细内容</p>'
+    detailImage: '',
+    notice: ''
   },
 ])
 
@@ -197,7 +225,8 @@ const editingCategory = reactive({
   name: '',
   icon: '',
   description: '',
-  details: ''
+  detailImage: '', // 添加详情长图字段
+  notice: '' // 添加注意事项字段
 })
 
 // 模态框显示状态
@@ -205,6 +234,7 @@ const showEditModal = ref(false)
 
 // 图标上传输入框引用
 const iconInput = ref<HTMLInputElement | null>(null)
+const detailImageInput = ref<HTMLInputElement | null>(null) // 添加详情长图输入框引用
 
 // 消息提示
 const message = ref('')
@@ -218,7 +248,8 @@ const addCategory = () => {
     name: '',
     icon: '',
     description: '',
-    details: ''
+    detailImage: '',
+    notice: ''
   })
   showEditModal.value = true
 }
@@ -305,6 +336,30 @@ const handleIconUpload = (event: Event) => {
   }
 }
 
+// 选择详情长图（触发文件选择）
+const selectDetailImage = () => {
+  if (detailImageInput.value) {
+    detailImageInput.value.click()
+  }
+}
+
+// 处理详情长图上传
+const handleDetailImageUpload = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+  
+  if (file) {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const imageUrl = e.target?.result as string
+      editingCategory.detailImage = imageUrl
+    }
+    reader.readAsDataURL(file)
+    
+    target.value = ''
+  }
+}
+
 // 关闭编辑模态框
 const closeEditModal = () => {
   showEditModal.value = false
@@ -325,11 +380,20 @@ const handleCreated = (editor: any) => {
   editorRef.value = editor
 }
 
+// 注意事项编辑器创建回调
+const handleNoticeCreated = (editor: any) => {
+  noticeEditorRef.value = editor
+}
+
 // 组件销毁时销毁编辑器
 onBeforeUnmount(() => {
   const editor = editorRef.value
   if (editor == null) return
   editor.destroy()
+  
+  const noticeEditor = noticeEditorRef.value
+  if (noticeEditor == null) return
+  noticeEditor.destroy()
 })
 </script>
 
