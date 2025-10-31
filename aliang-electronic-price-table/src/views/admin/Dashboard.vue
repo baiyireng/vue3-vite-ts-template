@@ -37,6 +37,7 @@
             v-model="titles.categorySection" 
             type="text" 
             class="title-input"
+            placeholder="请输入品类价格表标题"
           />
         </div>
         
@@ -47,6 +48,7 @@
             v-model="titles.orderSection" 
             type="text" 
             class="title-input"
+            placeholder="请输入下单说明标题"
           />
         </div>
       </div>
@@ -237,6 +239,39 @@ h2 {
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.title-management {
+  .form-group {
+    margin-bottom: 20px;
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #333;
+    }
+    
+    .title-input {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid #dcdfe6;
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-size: 14px;
+      transition: border-color 0.3s;
+      
+      &:focus {
+        outline: none;
+        border-color: #409eff;
+        box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
+      }
+      
+      &::placeholder {
+        color: #c0c4cc;
+      }
+    }
+  }
 }
 
 .image-management {
