@@ -43,4 +43,11 @@
     list-style: none;
   }
 }
+@media screen {
+    @media (max-width: 768px) {
+        .disclaimer_section {
+            margin-top: 0px;
+        }
+    }
+}
 </style>

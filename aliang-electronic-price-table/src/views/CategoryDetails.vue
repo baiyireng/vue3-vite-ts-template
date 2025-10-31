@@ -38,27 +38,27 @@ const category = ref<any>(null);
 
 // 从后端获取品类详情
 const fetchCategoryDetails = async (categoryId: number) => {
-  try {
-    const response = await categoryAPI.getById(categoryId);
-    if (response.category) {
-      category.value = response.category;
-    } else {
-      console.error('未找到指定品类');
+    try {
+        const response = await categoryAPI.getById(categoryId);
+        if (response.category) {
+            category.value = response.category;
+        } else {
+            console.error('未找到指定品类');
+        }
+    } catch (error) {
+        console.error('获取品类详情失败:', error);
     }
-  } catch (error) {
-    console.error('获取品类详情失败:', error);
-  }
 };
 
 onMounted(() => {
-  const categoryId = parseInt(route.params.id as string);
-  if (categoryId) {
-    fetchCategoryDetails(categoryId);
-  }
+    const categoryId = parseInt(route.params.id as string);
+    if (categoryId) {
+        fetchCategoryDetails(categoryId);
+    }
 });
 
 const goBack = () => {
-  router.go(-1);
+    router.go(-1);
 };
 </script>
 
@@ -74,6 +74,7 @@ const goBack = () => {
         padding: 48px 48px 0;
         display: flex;
         align-items: center;
+        box-sizing: border-box;
         .header_icon {
             width: 80px;
             height: 80px;
@@ -154,17 +155,24 @@ const goBack = () => {
 }
 @media screen {
     @media (max-width: 768px) {
-        .recharge-benefits{
-            .recharge-benefits-content{
+        .recharge-benefits {
+            .header {
+                padding: 0;
+                margin: 20px;
+                width: calc(100% - 40px);
+                overflow: hidden;
+            }
+            .recharge-benefits-content {
+                padding: 0;
+                margin: 20px;
                 flex-direction: column;
                 align-items: center;
-                .image-section{
+                .image-section {
                     width: 100%;
                 }
-                .notice-section{
+                .notice-section {
                     width: 100%;
                 }
-    
             }
         }
     }
