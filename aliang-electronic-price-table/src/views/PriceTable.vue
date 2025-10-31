@@ -4,7 +4,7 @@
         <header class="header">
             <!-- 使用 import.meta.url 动态导入 banner 图片 -->
             <div class="cardContentWrapper image-wrapper">
-                <img :src="bannerImg" alt="阿良电竞价格表" />
+                <img :src="bannerImg" alt="阿良电竞价格表" @click="handleClick(bannerImg)" />
             </div>
         </header>
 
@@ -45,27 +45,11 @@
 
             <!-- 店长微信和客服微信 -->
             <section class="contact-info image-wrapper">
-                <img :src="contactInfoImg" alt="店长微信和客服微信" />
+                <img :src="contactInfoImg" alt="店长微信和客服微信" @click="handleClick(contactInfoImg)" />
             </section>
 
             <!-- 免责声明 -->
-            <footer>
-                <div class="disclaimer_section">
-                    <span class="weaken">本页面由</span>
-                    <span class="emphasize">
-                        <a
-                            id="huoban-link"
-                            href="https://lilihuyu.com"
-                            class=""
-                            target="_blank"
-                            rel="noreferrer"
-                        >
-                            礼礼互娱</a
-                        ></span
-                    >
-                    <span class="weaken">提供技术支持</span>
-                </div>
-            </footer>
+            <Footer />
         </main>
     </div>
 </template>
@@ -74,6 +58,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { previewImages } from 'hevue-img-preview/v3';
+import Footer from '@/components/Footer.vue';
 
 const router = useRouter();
 
@@ -108,8 +93,8 @@ const handleClick = (img) => {
 };
 // 导航方法
 const navigateToCategory = (category: any) => {
-    console.log(`Navigating to ${category.name}`);
-    // 实现导航逻辑
+  console.log(`Navigating to ${category.name}`);
+  // 实现导航逻辑
 };
 </script>
 
@@ -185,7 +170,7 @@ const navigateToCategory = (category: any) => {
     position: relative;
     padding: 48px;
     .cardContentWrapper {
-        width: calc(100% - 40px);
+        // width: calc(100% - 40px);
         margin: 20px;
     }
     img {
@@ -223,6 +208,7 @@ const navigateToCategory = (category: any) => {
         position: absolute;
         z-index: 1;
         top: 0;
+        pointer-events: none;
     }
 }
 
