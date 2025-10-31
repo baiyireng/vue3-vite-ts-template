@@ -43,7 +43,7 @@ const rechargeBenefitsImg = new URL('@/assets/images/recharge_benefits.png', imp
 </script>
 <style lang="less">
 body{
-    background-color: rgb(59 184 246 / 22%);
+    // background-color: rgb(59 184 246 / 22%);
 }
 </style>
 <style scoped lang="less">

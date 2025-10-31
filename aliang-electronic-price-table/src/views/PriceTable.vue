@@ -1,57 +1,63 @@
 <template>
-    <div class="price-table">
-        <!-- 头部 -->
-        <header class="header">
-            <!-- 使用 import.meta.url 动态导入 banner 图片 -->
-            <div class="cardContentWrapper image-wrapper">
-                <img :src="bannerImg" alt="阿良电竞价格表" @click="handleClick(bannerImg)" />
-            </div>
-        </header>
+  <div class="price-table">
+    <!-- 头部 -->
+    <header class="header">
+      <!-- 使用 import.meta.url 动态导入 banner 图片 -->
+      <div class="cardContentWrapper image-wrapper">
+        <img :src="bannerImg" alt="阿良电竞价格表" @click="handleClick(bannerImg)" />
+      </div>
+    </header>
 
-        <!-- 主体 -->
-        <main class="main">
-            <section class="category-section cardBorder">
-                <h2 class="widget-header">阿良电竞各品类价格表（点击图标查看）</h2>
-                <ul class="category-list">
-                    <li
-                        v-for="(item, index) in categories"
-                        :key="index"
-                        @click="navigateToCategory(item)"
-                    >
-                        <img :src="item.icon" :alt="item.name" />
-                        <p>{{ item.name }}</p>
-                    </li>
-                </ul>
-            </section>
+    <!-- 主体 -->
+    <main class="main">
+      <section class="category-section cardBorder">
+        <h2 class="widget-header">阿良电竞各品类价格表（点击图标查看）</h2>
+        <ul class="category-list">
+          <li
+            v-for="(item, index) in categories"
+            :key="index"
+            @click="navigateToCategory(item)"
+          >
+            <img :src="item.icon" :alt="item.name" />
+            <p>{{ item.name }}</p>
+          </li>
+        </ul>
+      </section>
 
-            <!-- 下单须知 -->
-            <section class="order-notice image-wrapper">
-                <img :src="orderNoticeImg" alt="下单须知" @click="handleClick(orderNoticeImg)" />
-            </section>
+      <!-- 下单须知 -->
+      <section class="order-notice image-wrapper">
+        <img :src="orderNoticeImg" alt="下单须知" @click="handleClick(orderNoticeImg)" />
+      </section>
 
-            <!-- 下单价格 -->
-            <section class="order-price cardBorder">
-                <h3 class="widget-header">阿良电竞 | 下单价格</h3>
-                <div class="order-price-wrapper">
-                    <p>尊敬的贵宾，欢迎来到阿良电竞端游价格表！</p>
-                    <p>
-                        如需专属陪玩服务，请到公众号【阿良电竞】【我要下单】选择【我要下单】，联系客服微信为您量身定制！
-                    </p>
-                    <p>如有售后问题请直接添加下方微信号，专属售后24h为您服务～</p>
-                    <p>争做一个有高度，有温度，有态度的电竞俱乐部！</p>
-                    <p>阿良电竞愿您生活美满，事业步步高升，游戏场场凯旋！</p>
-                </div>
-            </section>
+      <!-- 下单价格 -->
+      <section class="order-price cardBorder">
+        <h3 class="widget-header">阿良电竞 | 下单价格</h3>
+        <div class="order-price-wrapper">
+          <p>尊敬的贵宾，欢迎来到阿良电竞端游价格表！</p>
+          <p>
+            如需专属陪玩服务，请到公众号【阿良电竞】【我要下单】选择【我要下单】，联系客服微信为您量身定制！
+          </p>
+          <p>如有售后问题请直接添加下方微信号，专属售后24h为您服务～</p>
+          <p>争做一个有高度，有温度，有态度的电竞俱乐部！</p>
+          <p>阿良电竞愿您生活美满，事业步步高升，游戏场场凯旋！</p>
+        </div>
+      </section>
 
-            <!-- 店长微信和客服微信 -->
-            <section class="contact-info image-wrapper">
-                <img :src="contactInfoImg" alt="店长微信和客服微信" @click="handleClick(contactInfoImg)" />
-            </section>
+      <!-- 店长微信和客服微信 -->
+      <section class="contact-info image-wrapper">
+        <img :src="contactInfoImg" alt="店长微信和客服微信" @click="handleClick(contactInfoImg)" />
+      </section>
 
-            <!-- 免责声明 -->
-            <Footer />
-        </main>
-    </div>
+      <!-- 免责声明 -->
+      <Footer />
+    </main>
+    
+    <!-- 模态框组件 -->
+    <RechargeBenefitsModal 
+      :visible="isModalVisible" 
+      @close="isModalVisible = false" 
+    />
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -59,8 +65,10 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { previewImages } from 'hevue-img-preview/v3';
 import Footer from '@/components/Footer.vue';
+import RechargeBenefitsModal from '@/components/RechargeBenefitsModal.vue';
 
 const router = useRouter();
+const isModalVisible = ref(false);
 
 // 使用 import.meta.url 动态导入图片资源
 const bannerImg = new URL('@/assets/images/banner.png', import.meta.url).href;
@@ -78,30 +86,45 @@ const icon7 = new URL('@/assets/images/icon7.png', import.meta.url).href;
 
 // 分类数据
 const categories = ref([
-    { icon: icon1, name: '预存须知' },
-    { icon: icon2, name: '三角洲行动...' },
-    { icon: icon3, name: '三角洲护航...' },
-    { icon: icon4, name: '三角洲炸单...' },
-    { icon: icon5, name: '永劫无间' },
-    { icon: icon6, name: '无畏契约' },
-    { icon: icon7, name: '其他游戏' },
+  { icon: icon1, name: '预存须知' },
+  { icon: icon2, name: '三角洲行动...' },
+  { icon: icon3, name: '三角洲护航...' },
+  { icon: icon4, name: '三角洲炸单...' },
+  { icon: icon5, name: '永劫无间' },
+  { icon: icon6, name: '无畏契约' },
+  { icon: icon7, name: '其他游戏' },
 ]);
-const handleClick = (img) => {
-    // [!code focus]
-    if (!img) return;
-    previewImages(img); // [!code focus]
+
+// 检测是否为移动设备
+const isMobile = () => {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 };
+
+const handleClick = (img) => {
+  if (!img) return;
+  previewImages(img);
+};
+
 // 导航方法
 const navigateToCategory = (category: any) => {
-    if (category.name === '预存须知') {
-        router.push({ name: 'RechargeBenefits' }); // 导航到新页面
+  if (category.name === '预存须知') {
+    // 检测设备类型，如果是移动设备则跳转页面，否则显示模态框
+    if (isMobile()) {
+      router.push({ name: 'RechargeBenefits' }); // 移动端跳转页面
     } else {
-        console.log(`Navigating to ${category.name}`);
-        // 实现其他分类的导航逻辑
+      isModalVisible.value = true; // PC端显示模态框
     }
+  } else {
+    console.log(`Navigating to ${category.name}`);
+    // 实现其他分类的导航逻辑
+  }
 };
 </script>
-
+<style lang="less">
+body{
+    background-color: #fff;
+}
+</style>
 <style scoped lang='less'>
 #app {
     color: rgba(0, 0, 0, 0.65);
@@ -196,7 +219,7 @@ const navigateToCategory = (category: any) => {
 }
 
 .main {
-    background: white;
+    // background: white;
     border-radius: 10px;
     padding: 48px 48px 0;
     // padding: 20px;
