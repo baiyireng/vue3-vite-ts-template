@@ -26,8 +26,6 @@
           
           <div class="category-actions">
             <button @click="editCategory(category)" class="edit-button">编辑</button>
-            <button @click="moveCategoryUp(index)" :disabled="index === 0" class="move-up-button">上移</button>
-            <button @click="moveCategoryDown(index)" :disabled="index === categories.length - 1" class="move-down-button">下移</button>
             <button @click="deleteCategory(category.id)" class="delete-button">删除</button>
           </div>
         </div>
@@ -103,7 +101,7 @@
             />
           </div>
           
-          <div class="form-group">
+          <!-- <div class="form-group">
             <label for="categoryDetails">详情内容（富文本）</label>
             <div style="border: 1px solid #ccc; margin-top: 10px;">
               <Toolbar
@@ -120,7 +118,7 @@
                 @onCreated="handleDetailsCreated"
               />
             </div>
-          </div>
+          </div> -->
           
           <div class="form-group">
             <label for="categoryNotice">注意事项（富文本）</label>
