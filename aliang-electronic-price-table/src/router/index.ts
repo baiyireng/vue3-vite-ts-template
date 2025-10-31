@@ -2,6 +2,7 @@ import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 // 确保路径正确，使用相对路径或别名
 import PriceTable from '@/views/PriceTable.vue';
 import RechargeBenefits from '@/views/RechargeBenefits.vue';
+import AdminLogin from '@/views/AdminLogin.vue';
 
 const routes = [
   {
@@ -13,6 +14,11 @@ const routes = [
     path: '/recharge-benefits',
     name: 'RechargeBenefits',
     component: RechargeBenefits,
+  },
+  {
+    path: '/admin/login',
+    name: 'AdminLogin',
+    component: AdminLogin,
   },
 ];
 
