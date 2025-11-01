@@ -68,6 +68,7 @@ const goBack = () => {
     color: #333;
     max-width: 1296px;
     margin: auto;
+    background-color: rgba(59, 184, 246, 0.22);;
 
     .header {
         // text-align: center;
@@ -157,8 +158,7 @@ const goBack = () => {
     @media (max-width: 768px) {
         .recharge-benefits {
             .header {
-                padding: 0;
-                margin: 20px;
+                padding: 20px 20px 0;
                 width: calc(100% - 40px);
                 overflow: hidden;
             }

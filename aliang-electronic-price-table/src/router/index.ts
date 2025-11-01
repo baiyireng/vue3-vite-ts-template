@@ -57,6 +57,12 @@ const routes = [
     component: RechargeBenefits,
   },
   {
+        path: '/category/:id',
+        name: 'CategoryDetails',
+        component: CategoryDetails,
+        meta: { requiresAuth: true }
+      },
+  {
     path: '/admin/login',
     name: 'AdminLogin',
     component: ()=> AdminLogin,
@@ -93,13 +99,7 @@ const routes = [
         name: 'WebsiteSettings',
         component: WebsiteSettings,
         meta: { requiresAuth: true }
-      },
-      {
-        path: 'category/:id',
-        name: 'CategoryDetails',
-        component: CategoryDetails,
-        meta: { requiresAuth: true }
-      },
+      }
     ]
   },
 //   {

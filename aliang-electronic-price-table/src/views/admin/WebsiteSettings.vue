@@ -34,6 +34,9 @@
         <img :src="form.background" alt="首页背景图" v-if="form.background" />
         <div class="no-image" v-else>点击上传背景图</div>
       </div>
+      <div class="image-actions" v-if="form.background">
+        <button @click.stop="deleteBackground" class="delete-button">删除背景图</button>
+      </div>
       <input 
         type="file" 
         ref="backgroundInputRef"
@@ -122,6 +125,12 @@ const handleBackgroundUpload = (event: Event) => {
     // 清空input值，以便下次选择同一文件也能触发change事件
     target.value = ''
   }
+}
+
+// 删除背景图
+const deleteBackground = () => {
+  form.background = ''
+  ElMessage.success('背景图已删除')
 }
 
 // 加载网站设置
@@ -234,6 +243,24 @@ h2 {
   
   .no-image {
     color: #999;
+  }
+}
+
+.image-actions {
+  margin-top: 10px;
+  
+  .delete-button {
+    background: #f56c6c;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    
+    &:hover {
+      background: #ff4d4f;
+    }
   }
 }
 
