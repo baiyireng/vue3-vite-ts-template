@@ -15,9 +15,14 @@ router.get('/', (req, res) => {
     const faviconResult = db.exec("SELECT url FROM home_images WHERE name = 'favicon'");
     const faviconUrl = faviconResult[0] ? faviconResult[0].values[0][0] : '';
     
+    // 获取背景图
+    const backgroundResult = db.exec("SELECT url FROM home_images WHERE name = 'background'");
+    const backgroundUrl = backgroundResult[0] ? backgroundResult[0].values[0][0] : '';
+    
     res.json({
       title: websiteTitle,
-      favicon: faviconUrl
+      favicon: faviconUrl,
+      background: backgroundUrl
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -27,7 +32,7 @@ router.get('/', (req, res) => {
 // 更新网站设置
 router.put('/', (req, res) => {
   try {
-    const { title, favicon } = req.body;
+    const { title, favicon, background } = req.body;
     const db = getDatabase();
     
     // 更新网站标题
@@ -37,6 +42,10 @@ router.put('/', (req, res) => {
     // 更新favicon
     stmt = db.prepare("INSERT OR REPLACE INTO home_images (name, url, label) VALUES ('favicon', ?, '网站图标')");
     stmt.run([favicon]);
+    
+    // 更新背景图
+    stmt = db.prepare("INSERT OR REPLACE INTO home_images (name, url, label) VALUES ('background', ?, '首页背景图')");
+    stmt.run([background]);
     
     saveDatabase();
     res.json({ message: '网站设置更新成功' });

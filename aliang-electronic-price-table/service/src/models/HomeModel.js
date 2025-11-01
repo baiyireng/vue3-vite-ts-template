@@ -24,8 +24,32 @@ class HomeModel {
   static updateImage(name, url, callback) {
     try {
       const db = getDatabase();
-      const stmt = db.prepare('UPDATE home_images SET url = ? WHERE name = ?');
-      stmt.run([url, name]);
+      // 检查设置是否存在
+      const checkStmt = db.prepare('SELECT * FROM home_images WHERE name = ?');
+      checkStmt.bind([name]);
+      let stmt = null;
+      // 如果存在，则更新，否则插入
+      if (checkStmt.step()) {
+        checkStmt.finalize();
+        // 在更新时，确保 label 字段保留原值（如果为空则用 name 填充）
+        const updateStmt = db.prepare('UPDATE home_images SET url = ?, label = COALESCE(label, ?) WHERE name = ?');
+        updateStmt.run([url, name, name]);
+        stmt = updateStmt;
+      } else {
+        checkStmt.finalize();
+        // 为新记录提供默认标签
+        const defaultLabels = {
+          'banner': '首页横幅图片',
+          'orderNotice': '下单须知图片',
+          'contactInfo': '联系方式图片',
+          'favicon': '网站图标',
+          'background': '首页背景图'
+        };
+        const label = defaultLabels[name] || name;
+        const insertStmt = db.prepare('INSERT INTO home_images (name, url, label) VALUES (?, ?, ?)');
+        insertStmt.run([name, url, label]);
+        stmt = insertStmt;
+      }
       saveDatabase();
       callback(null, { changes: stmt.getRowsModified ? stmt.getRowsModified() : 1 });
     } catch (err) {

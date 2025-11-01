@@ -28,6 +28,21 @@
       />
     </div>
     
+    <div class="form-group">
+      <label>首页背景图</label>
+      <div class="image-preview" @click="selectBackground">
+        <img :src="form.background" alt="首页背景图" v-if="form.background" />
+        <div class="no-image" v-else>点击上传背景图</div>
+      </div>
+      <input 
+        type="file" 
+        ref="backgroundInputRef"
+        @change="handleBackgroundUpload"
+        accept="image/*"
+        style="display: none"
+      />
+    </div>
+    
     <div class="form-actions">
       <button @click="saveSettings" class="save-button" :disabled="loading">
         {{ loading ? '保存中...' : '保存设置' }}
@@ -47,10 +62,12 @@ import { websiteAPI } from '@/api/index'
 
 const form = reactive({
   title: '',
-  favicon: ''
+  favicon: '',
+  background: ''
 })
 
 const faviconInputRef = ref<HTMLInputElement | null>(null)
+const backgroundInputRef = ref<HTMLInputElement | null>(null)
 const message = ref('')
 const isError = ref(false)
 const loading = ref(false)
@@ -81,6 +98,32 @@ const handleFaviconUpload = (event: Event) => {
   }
 }
 
+// 选择背景图（触发文件选择）
+const selectBackground = () => {
+  if (backgroundInputRef.value) {
+    backgroundInputRef.value.click()
+  }
+}
+
+// 处理背景图上传
+const handleBackgroundUpload = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+  
+  if (file) {
+    // 在实际项目中，这里应该上传到服务器
+    // 这里我们使用本地预览
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      form.background = e.target?.result as string
+    }
+    reader.readAsDataURL(file)
+    
+    // 清空input值，以便下次选择同一文件也能触发change事件
+    target.value = ''
+  }
+}
+
 // 加载网站设置
 const loadSettings = async () => {
   try {
@@ -90,6 +133,9 @@ const loadSettings = async () => {
     }
     if (response.favicon) {
       form.favicon = response.favicon
+    }
+    if (response.background) {
+      form.background = response.background
     }
   } catch (error) {
     console.error('加载网站设置失败:', error)
@@ -103,7 +149,8 @@ const saveSettings = async () => {
   try {
     await websiteAPI.updateSettings({
       title: form.title,
-      favicon: form.favicon
+      favicon: form.favicon,
+      background: form.background
     })
     ElMessage.success('网站设置保存成功！')
   } catch (error) {

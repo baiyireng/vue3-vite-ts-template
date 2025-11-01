@@ -236,6 +236,10 @@ const fetchData = async () => {
             }
             favicon.href = websiteResponse.favicon;
         }
+
+        if (websiteResponse.background) {
+            document.body.style.backgroundImage = `url(${websiteResponse.background})`;
+        }
         
         // 缓存网站设置
         cacheWebsiteSettings(websiteResponse);
