@@ -1,5 +1,5 @@
 // API配置文件
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = '/api';
 
 // 首页相关API
 export const homeAPI = {
