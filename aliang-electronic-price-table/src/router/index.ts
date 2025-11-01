@@ -149,7 +149,7 @@ const router = createRouter({
 // 添加路由守卫
 router.beforeEach(async (to, from, next) => {
   // 定义公开页面
-  const publicPages = ['/admin/login'];
+  const publicPages = ['/admin/login','/','/recharge-benefits'];
   const authRequired = !publicPages.includes(to.path);
   const loggedIn = isAuthenticated();
 

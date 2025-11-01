@@ -20,5 +20,19 @@ export default defineConfig({
         alias: {
         '@': path.resolve(__dirname, 'src'),
         },
+    },
+    build: {
+        outDir: 'dist/client', // 指定输出目录
+        assetsDir: 'assets', // 指定静态资源目录
+        rollupOptions: {
+            output: {
+                // 分包
+                manualChunks: {
+                    'vue-vendor': ['vue', 'vue-router'],
+                    'element-plus-vendor': ['element-plus'],
+                    'editor-vendor': ['@wangeditor/editor', '@wangeditor/editor-for-vue'],
+                }
+            }
+        }
     }
 });
