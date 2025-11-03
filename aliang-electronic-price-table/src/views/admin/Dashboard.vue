@@ -1,109 +1,150 @@
 <template>
   <div class="admin-dashboard">
-    <!-- <h1>阿良电竞价格表管理后台</h1>
-    
-    <div class="navigation">
-      <router-link to="/admin/dashboard" class="nav-item" :class="{ active: activeTab === 'home' }" @click="activeTab = 'home'">首页管理</router-link>
-      <router-link to="/admin/categories" class="nav-item" :class="{ active: activeTab === 'categories' }" @click="activeTab = 'categories'">品类管理</router-link>
-      <router-link to="/admin/account" class="nav-item" :class="{ active: activeTab === 'account' }" @click="activeTab = 'account'">账号管理</router-link>
-      <router-link to="/admin/website" class="nav-item" :class="{ active: activeTab === 'website' }" @click="activeTab = 'website'">网站设置</router-link>
-      <button @click="handleLogout" class="logout-button">退出登录</button>
-    </div>
-     -->
-    <!-- 首页管理 -->
-    <div v-if="activeTab === 'home'">
-      <div class="management-section">
-        <h2>图片资源管理</h2>
-        <div class="image-management">
-          <div class="image-item" v-for="image in images" :key="image.name">
-            <label>{{ image.label }}</label>
-            <div class="image-preview" @click="selectImage(image.name)">
-              <img :src="image.url" :alt="image.label" v-if="image.url" />
-              <div class="no-image" v-else>点击上传图片</div>
+    <el-main>
+          <!-- 首页管理 -->
+          <div v-if="activeMenu === '1'">
+            <div class="management-section">
+              <h3>图片资源管理</h3>
+              <div class="image-management">
+                <div class="image-item" v-for="image in images" :key="image.name">
+                  <label>{{ image.label }}</label>
+                  <div class="image-preview" @click="selectImage(image.name)">
+                    <img :src="image.url" :alt="image.label" v-if="image.url" />
+                    <div class="no-image" v-else>点击上传图片</div>
+                  </div>
+                  <input 
+                    type="file" 
+                    :ref="el => setImageInputRef(el, image.name)"
+                    @change="handleImageUpload($event, image.name)"
+                    accept="image/*"
+                    style="display: none"
+                  />
+                </div>
+              </div>
             </div>
-            <input 
-              type="file" 
-              :ref="el => setImageInputRef(el, image.name)"
-              @change="handleImageUpload($event, image.name)"
-              accept="image/*"
-              style="display: none"
-            />
-          </div>
-        </div>
-      </div>
 
-      <div class="management-section">
-        <h2>标题文本管理</h2>
-        <div class="title-management">
-          <div class="form-group">
-            <label for="categorySectionTitle">品类价格表标题</label>
-            <input 
-              id="categorySectionTitle" 
-              v-model="titles.categorySection" 
-              type="text" 
-              class="title-input"
-              placeholder="请输入品类价格表标题"
-            />
+            <div class="management-section">
+              <h3>标题文本管理</h3>
+              <div class="title-management">
+                <div class="form-group">
+                  <label for="categorySectionTitle">品类价格表标题</label>
+                  <input 
+                    id="categorySectionTitle" 
+                    v-model="titles.categorySection" 
+                    type="text" 
+                    class="title-input"
+                    placeholder="请输入品类价格表标题"
+                  />
+                </div>
+                
+                <div class="form-group">
+                  <label for="orderSectionTitle">下单说明标题</label>
+                  <input 
+                    id="orderSectionTitle" 
+                    v-model="titles.orderSection" 
+                    type="text" 
+                    class="title-input"
+                    placeholder="请输入下单说明标题"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="management-section">
+              <h3>下单须知文本管理</h3>
+              <div style="border: 1px solid #ccc; margin-top: 20px;">
+                <Toolbar
+                  style="border-bottom: 1px solid #ccc"
+                  :editor="editorRef"
+                  :defaultConfig="toolbarConfig"
+                  :mode="mode"
+                />
+                <Editor
+                  style="height: 300px; overflow-y: hidden;"
+                  v-model="orderNoticeText"
+                  :defaultConfig="editorConfig"
+                  :mode="mode"
+                  @onCreated="handleCreated"
+                />
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <el-button 
+                type="primary" 
+                @click="saveChanges"
+                :loading="loading"
+              >
+                {{ loading ? '保存中...' : '保存更改' }}
+              </el-button>
+            </div>
+            
+            <div v-if="message" class="message" :class="{ error: isError }">
+              {{ message }}
+            </div>
           </div>
           
-          <div class="form-group">
-            <label for="orderSectionTitle">下单说明标题</label>
-            <input 
-              id="orderSectionTitle" 
-              v-model="titles.orderSection" 
-              type="text" 
-              class="title-input"
-              placeholder="请输入下单说明标题"
-            />
+          <!-- 品类管理 -->
+          <div v-else-if="activeMenu === '2'">
+            <CategoryManagement />
           </div>
-        </div>
-      </div>
-
-      <div class="management-section">
-        <h2>下单须知文本管理</h2>
-        <div style="border: 1px solid #ccc; margin-top: 20px;">
-          <Toolbar
-            style="border-bottom: 1px solid #ccc"
-            :editor="editorRef"
-            :defaultConfig="toolbarConfig"
-            :mode="mode"
-          />
-          <Editor
-            style="height: 300px; overflow-y: hidden;"
-            v-model="orderNoticeText"
-            :defaultConfig="editorConfig"
-            :mode="mode"
-            @onCreated="handleCreated"
-          />
-        </div>
-      </div>
-
-      <div class="form-actions">
-        <button @click="saveChanges" class="save-button" :disabled="loading">
-          {{ loading ? '保存中...' : '保存更改' }}
-        </button>
-      </div>
-    </div>
-    
-    <div v-if="message" class="message" :class="{ error: isError }">
-      {{ message }}
-    </div>
+          
+          <!-- 网站设置 -->
+          <div v-else-if="activeMenu === '3'">
+            <WebsiteSettings />
+          </div>
+          
+          <!-- 账号管理 -->
+          <div v-else-if="activeMenu === '4'">
+            <AccountManagement />
+          </div>
+        </el-main>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onBeforeUnmount, onMounted } from 'vue'
+import { ref, reactive, onBeforeUnmount, onMounted, computed } from 'vue'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 import '@wangeditor/editor/dist/css/style.css'
 import { homeAPI } from '@/api/index'
-import { ElMessage } from 'element-plus'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
+import { House, Grid, User, Setting } from '@element-plus/icons-vue'
+import { ElContainer, ElAside, ElMain, ElHeader, ElMenu, ElMenuItem, ElIcon, ElButton, ElMessage } from 'element-plus'
+import CategoryManagement from './CategoryManagement.vue'
+import WebsiteSettings from './WebsiteSettings.vue'
+import AccountManagement from './AccountManagement.vue'
 
-// 当前激活的标签页
-const activeTab = ref('home')
+// 菜单标题映射
+const menuTitles: Record<string, string> = {
+  '1': '首页管理',
+  '2': '品类管理',
+  '3': '网站设置',
+  '4': '账号管理'
+}
+
+// 计算属性：当前页面标题
+const pageTitle = computed(() => menuTitles[activeMenu.value])
 
 // 编辑器实例，必须用 shallowRef
 const editorRef = ref()
+
+// 获取当前用户信息
+const userStr = localStorage.getItem('adminUser')
+const user = userStr ? JSON.parse(userStr) : null
+const username = user?.username || '管理员'
+
+// 当前路由
+const route = useRoute()
+const router = useRouter()
+
+// 计算当前激活的菜单项
+const activeMenu = computed(() => {
+  const path = route.path
+  if (path.includes('categories')) return '2'
+  if (path.includes('account')) return '4'
+  if (path.includes('website')) return '3'
+  return '1'
+})
 
 // 内容 HTML
 const orderNoticeText = ref('<p>尊敬的贵宾，欢迎来到阿良电竞端游价格表！</p><p>如需专属陪玩服务，请到公众号【阿良电竞】【我要下单】选择【我要下单】，联系客服微信为您量身定制！</p><p>如有售后问题请直接添加下方微信号，专属售后24h为您服务～</p><p>争做一个有高度，有温度，有态度的电竞俱乐部！</p><p>阿良电竞愿您生活美满，事业步步高升，游戏场场凯旋！</p>')
@@ -144,9 +185,6 @@ const message = ref('')
 const isError = ref(false)
 const loading = ref(false)
 
-// 路由
-const router = useRouter()
-
 // 设置图片输入框引用
 const setImageInputRef = (el: HTMLInputElement | null, name: string) => {
   if (el) {
@@ -163,22 +201,38 @@ const selectImage = (name: string) => {
 }
 
 // 处理图片上传
-const handleImageUpload = (event: Event, name: string) => {
+const handleImageUpload = async (event: Event, name: string) => {
   const target = event.target as HTMLInputElement
   const file = target.files?.[0]
   
   if (file) {
-    // 在实际项目中，这里应该上传到服务器
-    // 这里我们使用本地预览
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      const imageUrl = e.target?.result as string
-      const image = images.find(img => img.name === name)
-      if (image) {
-        image.url = imageUrl
+    try {
+      // 创建FormData对象用于上传文件
+      const formData = new FormData()
+      formData.append('image', file)
+      
+      // 上传图片到服务器
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      })
+      
+      const result = await response.json()
+      
+      if (result.url) {
+        // 更新图片URL
+        const image = images.find(img => img.name === name)
+        if (image) {
+          image.url = result.url
+        }
+        ElMessage.success('图片上传成功')
+      } else {
+        ElMessage.error('图片上传失败')
       }
+    } catch (error) {
+      console.error('上传失败:', error)
+      ElMessage.error('上传失败: ' + (error as Error).message)
     }
-    reader.readAsDataURL(file)
     
     // 清空input值，以便下次选择同一文件也能触发change事件
     target.value = ''
@@ -246,6 +300,24 @@ const saveChanges = async () => {
   }
 };
 
+// 处理菜单选择
+const handleMenuSelect = (index: string) => {
+  switch (index) {
+    case '1':
+      router.push('/admin/dashboard');
+      break;
+    case '2':
+      router.push('/admin/categories');
+      break;
+    case '3':
+      router.push('/admin/website');
+      break;
+    case '4':
+      router.push('/admin/account');
+      break;
+  }
+};
+
 // 退出登录
 const handleLogout = () => {
   // 清除本地存储的token和用户信息
@@ -256,72 +328,43 @@ const handleLogout = () => {
   router.push('/admin/login');
 };
 
+// 组件销毁时销毁编辑器
+onBeforeUnmount(() => {
+  const editor = editorRef.value;
+  if (editor == null) return;
+  editor.destroy();
+});
+
 // 组件挂载时获取数据
 onMounted(() => {
   fetchData();
 });
-
-// 组件销毁时销毁编辑器
-onBeforeUnmount(() => {
-  const editor = editorRef.value
-  if (editor == null) return
-  editor.destroy()
-})
 </script>
 
 <style scoped lang="less">
 .admin-dashboard {
-  padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.navigation {
-  display: flex;
-  margin-bottom: 30px;
-  border-bottom: 1px solid #eee;
+  height: 100vh;
   
-  .nav-item {
-    padding: 10px 20px;
-    text-decoration: none;
-    color: #666;
-    border-bottom: 3px solid transparent;
-    
-    &.active {
-      color: #409eff;
-      border-bottom-color: #409eff;
-    }
-    
-    &:hover:not(.active) {
-      color: #333;
-    }
-  }
-  
-  .logout-button {
-    margin-left: auto;
-    background: #f56c6c;
+  .logo {
     color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
-    cursor: pointer;
-    
-    &:hover {
-      background: #f78989;
-    }
+    text-align: center;
+    padding: 20px 0;
+    border-bottom: 1px solid #444;
   }
-}
-
-h1 {
-  text-align: center;
-  color: #333;
-  margin-bottom: 30px;
-}
-
-h2 {
-  color: #555;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 10px;
+  
+  .el-header {
+    background-color: #fff;
+  }
+  
+  .page-header h2 {
+    margin: 0;
+    color: #333;
+  }
+  
+  .user-info {
+    display: flex;
+    align-items: center;
+  }
 }
 
 .management-section {
@@ -330,6 +373,59 @@ h2 {
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+h3 {
+  color: #555;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+.image-management {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+  
+  .image-item {
+    display: flex;
+    flex-direction: column;
+    
+    label {
+      margin-bottom: 10px;
+      font-weight: 500;
+      color: #333;
+    }
+    
+    .image-preview {
+      width: 100%;
+      height: 150px;
+      border: 2px dashed #d9d9d9;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      overflow: hidden;
+      position: relative;
+      
+      &:hover {
+        border-color: #409eff;
+      }
+      
+      img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: cover;
+      }
+      
+      .no-image {
+        color: #999;
+        font-size: 14px;
+      }
+    }
+  }
 }
 
 .title-management {
@@ -365,94 +461,47 @@ h2 {
   }
 }
 
-.image-management {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 20px;
-  margin-top: 20px;
-}
-
-.image-item {
-  display: flex;
-  flex-direction: column;
-  
-  label {
-    margin-bottom: 10px;
-    font-weight: 500;
-  }
-  
-  .image-preview {
-    border: 1px dashed #ccc;
-    border-radius: 4px;
-    height: 150px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    overflow: hidden;
-    
-    img {
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: cover;
-    }
-    
-    .no-image {
-      color: #999;
-    }
-  }
-}
-
 .form-actions {
   text-align: center;
   margin-top: 30px;
-}
-
-.save-button {
-  background: #409eff;
-  color: white;
-  border: none;
-  padding: 12px 30px;
-  font-size: 16px;
-  border-radius: 4px;
-  cursor: pointer;
   
-  &:disabled {
-    background: #a0cfff;
-    cursor: not-allowed;
-  }
-  
-  &:not(:disabled):hover {
-    background: #66b1ff;
+  .save-button {
+    padding: 12px 30px;
+    background-color: #409eff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    
+    &:hover:not(:disabled) {
+      background-color: #66b1ff;
+    }
+    
+    &:disabled {
+      background-color: #a0cfff;
+      cursor: not-allowed;
+    }
   }
 }
 
 .message {
-  text-align: center;
   margin-top: 20px;
-  padding: 10px;
+  padding: 10px 15px;
   border-radius: 4px;
-  color: #67c23a;
-  background-color: #f0f9ec;
+  text-align: center;
   
   &.error {
-    color: #f56c6c;
     background-color: #fef0f0;
-  }
-}
-
-@media (max-width: 768px) {
-  .image-management {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    color: #f56c6c;
+    border: 1px solid #fde2e2;
   }
   
-  .navigation {
-    flex-wrap: wrap;
-    
-    .logout-button {
-      margin-left: 0;
-      margin-top: 10px;
-    }
+  &:not(.error) {
+    background-color: #f0f9eb;
+    color: #67c23a;
+    border: 1px solid #e1f3d8;
   }
 }
 </style>

@@ -1,30 +1,22 @@
 {
-  "name": "service",
+  "name": "aliang-electronic-price-table-service",
   "version": "1.0.0",
-  "description": "Backend service for aliang-electronic-price-table",
+  "description": "",
   "main": "src/index.js",
   "scripts": {
-    "start": "pm2 start ecosystem.config.js",
-    "dev": "nodemon src/index.js",
-    "pm2:start": "pm2 start ecosystem.config.js",
-    "pm2:stop": "pm2 stop ecosystem.config.js",
-    "pm2:restart": "pm2 restart ecosystem.config.js",
-    "pm2:status": "pm2 status",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
   },
-  "keywords": [
-    "node.js",
-    "express",
-    "sql.js"
-  ],
+  "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.18.2",
-    "sql.js": "^1.12.0",
-    "body-parser": "^1.20.2",
+    "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
-    "pm2": "^5.3.0"
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "sql.js": "^1.8.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
