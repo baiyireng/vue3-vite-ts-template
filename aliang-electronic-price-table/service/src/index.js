@@ -3,6 +3,18 @@ const path = require('path');
 const cors = require('cors');
 const fs = require('fs');
 
+// 确保日志目录存在
+const logsDir = path.join(__dirname, 'logs');
+if (!fs.existsSync(logsDir)) {
+  fs.mkdirSync(logsDir, { recursive: true });
+}
+
+// 确保数据目录存在
+const dataDir = path.join(__dirname, 'data');
+if (!fs.existsSync(dataDir)) {
+  fs.mkdirSync(dataDir, { recursive: true });
+}
+
 // 路由
 const homeRoutes = require('./routes/homeRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
@@ -17,7 +29,7 @@ const PORT = process.env.PORT || 3000;
 
 // 中间件
 app.use(cors());
-// 增加请求体大小限制，解决PayloadTooLargeError错误
+// 增加请求体大小限制
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
@@ -35,7 +47,7 @@ app.use('/api/auth', userRoutes); // 添加用户路由
 app.use('/api/website', websiteRoutes); // 添加网站设置路由
 
 // 提供图片访问服务
-app.use('/images', express.static(path.join(__dirname, 'data/images')));
+app.use('/images', express.static(path.join(dataDir, 'images')));
 
 // 服务器启动时打印数据库内容
 app.listen(PORT, () => {

@@ -7,6 +7,9 @@ WORKDIR /app
 # 复制 package.json 和 package-lock.json（如果存在）
 COPY package*.json ./
 
+# 安装PM2
+RUN npm install -g pm2
+
 # 安装依赖
 RUN npm install
 
@@ -19,5 +22,5 @@ RUN mkdir -p data
 # 暴露端口
 EXPOSE 3000
 
-# 启动应用
-CMD ["npm", "start"]
+# 使用PM2启动应用
+CMD ["pm2-runtime", "ecosystem.config.js"]

@@ -4,7 +4,7 @@
   "description": "Backend service for aliang-electronic-price-table",
   "main": "src/index.js",
   "scripts": {
-    "start": "node src/index.js",
+    "start": "pm2 start ecosystem.config.js",
     "dev": "nodemon src/index.js",
     "pm2:start": "pm2 start ecosystem.config.js",
     "pm2:stop": "pm2 stop ecosystem.config.js",
@@ -23,7 +23,8 @@
     "express": "^4.18.2",
     "sql.js": "^1.12.0",
     "body-parser": "^1.20.2",
-    "cors": "^2.8.5"
+    "cors": "^2.8.5",
+    "pm2": "^5.3.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"

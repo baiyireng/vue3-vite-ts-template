@@ -7,6 +7,6 @@ services:
       - "3000:3000"
     volumes:
       - ./data:/app/data
-      - ../.env:/app/.env
-    env_file:
-      - ../.env
+      - ./logs:/app/logs
+    environment:
+      - NODE_ENV=production
