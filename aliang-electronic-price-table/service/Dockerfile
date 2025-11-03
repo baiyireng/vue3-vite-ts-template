@@ -16,8 +16,12 @@ RUN npm install
 # 复制应用代码
 COPY . .
 
-# 创建数据目录
-RUN mkdir -p data
+# 创建数据和图片目录，并设置权限
+RUN mkdir -p data/images && \
+    chown -R node:node data
+
+# 切换到node用户运行应用
+USER node
 
 # 暴露端口
 EXPOSE 3000

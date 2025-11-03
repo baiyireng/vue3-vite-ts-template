@@ -5,10 +5,17 @@ const path = require('path');
 const fs = require('fs');
 const { getDatabase, saveDatabase } = require('../config/database');
 
-// 确保上传目录存在
-const uploadDir = path.join(__dirname, '../data/images');
+// 使用与主应用相同的图片目录路径
+const uploadDir = path.join(__dirname, '../../data/images');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+// 设置目录权限，确保所有用户都可以读取
+try {
+  fs.chmodSync(uploadDir, 0o755);
+} catch (err) {
+  console.log('设置图片目录权限时出错:', err.message);
 }
 
 // 配置multer存储
@@ -45,8 +52,15 @@ router.post('/', upload.single('image'), (req, res) => {
       return res.status(400).json({ error: '没有上传文件' });
     }
 
-    // 构建可访问的URL
-    const imageUrl = `/images/${req.file.filename}`;
+    // 设置文件权限，确保可以被读取
+    try {
+      fs.chmodSync(req.file.path, 0o644);
+    } catch (err) {
+      console.log('设置文件权限时出错:', err.message);
+    }
+
+    // 构建可访问的URL，使用posix格式确保跨平台兼容性
+    const imageUrl = path.posix.join('/images', req.file.filename);
     
     res.json({ 
       message: '图片上传成功',

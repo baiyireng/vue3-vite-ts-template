@@ -87,7 +87,7 @@ async function copyServiceFiles() {
   // 需要复制的service目录中的文件和文件夹
   const serviceFiles = [
     'src',
-    'data',
+    // 'data',
     'package.json',
     'package-lock.json',
     'Dockerfile',
