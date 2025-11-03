@@ -2,17 +2,10 @@ const fs = require('fs');
 const path = require('path');
 const initSqlJs = require('sql.js');
 
-// 确保data目录存在，并设置正确的权限
+// 确保data目录存在
 const dataDir = path.join(__dirname, '../../data');
 if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
-}
-
-// 设置目录权限为755（所有者读写执行，组和其他用户读执行）
-try {
-  fs.chmodSync(dataDir, 0o755);
-} catch (err) {
-  console.log('设置数据目录权限时出错:', err.message);
 }
 
 // 数据库文件路径
@@ -60,8 +53,8 @@ async function initDatabase() {
         details TEXT,
         notice TEXT,
         sort_order INTEGER DEFAULT 0,
-        created_at TEXT DEFAULT (datetime('now', 'localtime')),
-        updated_at TEXT DEFAULT (datetime('now', 'localtime'))
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )`);
       
       dbInstance.run(`CREATE TABLE order_notices (
@@ -74,9 +67,7 @@ async function initDatabase() {
         username TEXT NOT NULL UNIQUE,
         password TEXT NOT NULL,
         name TEXT NOT NULL,
-        role TEXT NOT NULL DEFAULT 'user',
-        created_at TEXT DEFAULT (datetime('now', 'localtime')),
-        updated_at TEXT DEFAULT (datetime('now', 'localtime'))
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )`);
       
       // 插入默认数据
@@ -93,15 +84,14 @@ async function initDatabase() {
       dbInstance.run(`INSERT OR IGNORE INTO order_notices (id, notice) VALUES (1, '<p>暂无下单须知</p>')`);
       
       // 插入默认品类数据
-      const now = "datetime('now', 'localtime')";
       dbInstance.run(`INSERT OR IGNORE INTO categories (name, description, icon, detail_image, details, notice, sort_order, created_at, updated_at) VALUES 
-        ('预存须知', '预存须知详细信息', '', '', '', '', 1, ${now}, ${now}),
-        ('三角洲行动...', '三角洲行动详细介绍', '', '', '', '', 2, ${now}, ${now}),
-        ('三角洲护航...', '三角洲护航详细介绍', '', '', '', '', 3, ${now}, ${now}),
-        ('三角洲炸单...', '三角洲炸单详细介绍', '', '', '', '', 4, ${now}, ${now}),
-        ('永劫无间', '永劫无间详细介绍', '', '', '', '', 5, ${now}, ${now}),
-        ('无畏契约', '无畏契约详细介绍', '', '', '', '', 6, ${now}, ${now}),
-        ('其他游戏', '其他游戏详细介绍', '', '', '', '', 7, ${now}, ${now})`);
+        ('预存须知', '预存须知详细信息', '', '', '', '', 1, datetime('now'), datetime('now')),
+        ('三角洲行动...', '三角洲行动详细介绍', '', '', '', '', 2, datetime('now'), datetime('now')),
+        ('三角洲护航...', '三角洲护航详细介绍', '', '', '', '', 3, datetime('now'), datetime('now')),
+        ('三角洲炸单...', '三角洲炸单详细介绍', '', '', '', '', 4, datetime('now'), datetime('now')),
+        ('永劫无间', '永劫无间详细介绍', '', '', '', '', 5, datetime('now'), datetime('now')),
+        ('无畏契约', '无畏契约详细介绍', '', '', '', '', 6, datetime('now'), datetime('now')),
+        ('其他游戏', '其他游戏详细介绍', '', '', '', '', 7, datetime('now'), datetime('now'))`);
       
       // 保存数据库到文件
       saveDatabase();
@@ -151,15 +141,14 @@ function ensureDefaultData() {
   const categoriesResult = dbInstance.exec("SELECT COUNT(*) as count FROM categories");
   const categories = categoriesResult.length > 0 ? categoriesResult[0].values[0][0] : 0;
   if (categories === 0) {
-    const now = "datetime('now', 'localtime')";
     dbInstance.run(`INSERT INTO categories (name, description, icon, detail_image, details, notice, sort_order, created_at, updated_at) VALUES 
-      ('预存须知', '预存须知详细信息', '', '', '', '', 1, ${now}, ${now}),
-      ('三角洲行动...', '三角洲行动详细介绍', '', '', '', '', 2, ${now}, ${now}),
-      ('三角洲护航...', '三角洲护航详细介绍', '', '', '', '', 3, ${now}, ${now}),
-      ('三角洲炸单...', '三角洲炸单详细介绍', '', '', '', '', 4, ${now}, ${now}),
-      ('永劫无间', '永劫无间详细介绍', '', '', '', '', 5, ${now}, ${now}),
-      ('无畏契约', '无畏契约详细介绍', '', '', '', '', 6, ${now}, ${now}),
-      ('其他游戏', '其他游戏详细介绍', '', '', '', '', 7, ${now}, ${now})`);
+      ('预存须知', '预存须知详细信息', '', '', '', '', 1, datetime('now'), datetime('now')),
+      ('三角洲行动...', '三角洲行动详细介绍', '', '', '', '', 2, datetime('now'), datetime('now')),
+      ('三角洲护航...', '三角洲护航详细介绍', '', '', '', '', 3, datetime('now'), datetime('now')),
+      ('三角洲炸单...', '三角洲炸单详细介绍', '', '', '', '', 4, datetime('now'), datetime('now')),
+      ('永劫无间', '永劫无间详细介绍', '', '', '', '', 5, datetime('now'), datetime('now')),
+      ('无畏契约', '无畏契约详细介绍', '', '', '', '', 6, datetime('now'), datetime('now')),
+      ('其他游戏', '其他游戏详细介绍', '', '', '', '', 7, datetime('now'), datetime('now'))`);
   }
   
   // 检查users表中的默认数据

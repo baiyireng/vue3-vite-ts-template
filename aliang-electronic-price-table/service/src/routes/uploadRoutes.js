@@ -11,13 +11,6 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// 设置目录权限，确保所有用户都可以读取
-try {
-  fs.chmodSync(uploadDir, 0o755);
-} catch (err) {
-  console.log('设置图片目录权限时出错:', err.message);
-}
-
 // 配置multer存储
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -50,13 +43,6 @@ router.post('/', upload.single('image'), (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: '没有上传文件' });
-    }
-
-    // 设置文件权限，确保可以被读取
-    try {
-      fs.chmodSync(req.file.path, 0o644);
-    } catch (err) {
-      console.log('设置文件权限时出错:', err.message);
     }
 
     // 构建可访问的URL，使用posix格式确保跨平台兼容性

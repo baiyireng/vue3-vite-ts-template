@@ -3,30 +3,22 @@ const path = require('path');
 const cors = require('cors');
 const fs = require('fs');
 
-// 确保日志目录存在，并设置权限
+// 确保日志目录存在
 const logsDir = path.join(__dirname, 'logs');
 if (!fs.existsSync(logsDir)) {
   fs.mkdirSync(logsDir, { recursive: true });
 }
 
-// 确保数据目录存在，并设置权限
+// 确保数据目录存在
 const dataDir = path.join(__dirname, 'data');
 if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
 }
 
-// 确保图片目录存在，并设置权限
-const imagesDir = path.join(__dirname, 'data/images');
+// 确保图片目录存在
+const imagesDir = path.join(__dirname, '../data/images');
 if (!fs.existsSync(imagesDir)) {
   fs.mkdirSync(imagesDir, { recursive: true });
-}
-
-// 设置目录权限，确保所有用户都可以读取
-try {
-  fs.chmodSync(dataDir, 0o755);
-  fs.chmodSync(imagesDir, 0o755);
-} catch (err) {
-  console.log('设置目录权限时出错:', err.message);
 }
 
 // 路由

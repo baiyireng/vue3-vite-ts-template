@@ -12,6 +12,7 @@ class HomeModel {
       while (stmt.step()) {
         result.push(stmt.getAsObject());
       }
+      stmt.free(); // 释放Statement资源
       console.log('getAllImages result:', result); // 调试信息
       callback(null, result);
     } catch (err) {
@@ -30,13 +31,13 @@ class HomeModel {
       let stmt = null;
       // 如果存在，则更新，否则插入
       if (checkStmt.step()) {
-        checkStmt.finalize();
+        checkStmt.free();
         // 在更新时，确保 label 字段保留原值（如果为空则用 name 填充）
         const updateStmt = db.prepare('UPDATE home_images SET url = ?, label = COALESCE(label, ?) WHERE name = ?');
         updateStmt.run([url, name, name]);
         stmt = updateStmt;
       } else {
-        checkStmt.finalize();
+        checkStmt.free();
         // 为新记录提供默认标签
         const defaultLabels = {
           'banner': '首页横幅图片',
@@ -68,6 +69,7 @@ class HomeModel {
       while (stmt.step()) {
         result.push(stmt.getAsObject());
       }
+      stmt.free(); // 释放Statement资源
       console.log('getAllTitles result:', result); // 调试信息
       callback(null, result);
     } catch (err) {
@@ -82,6 +84,7 @@ class HomeModel {
       const db = getDatabase();
       const stmt = db.prepare('UPDATE titles SET title = ? WHERE section = ?');
       stmt.run([title, section]);
+      stmt.free(); // 释放Statement资源
       saveDatabase();
       callback(null, { changes: stmt.getRowsModified ? stmt.getRowsModified() : 1 });
     } catch (err) {
@@ -100,6 +103,7 @@ class HomeModel {
       while (stmt.step()) {
         result.push(stmt.getAsObject());
       }
+      stmt.free(); // 释放Statement资源
       console.log('getOrderNotice result:', result); // 调试信息
       
       // 如果没有记录，返回默认值
@@ -125,15 +129,21 @@ class HomeModel {
       while (checkStmt.step()) {
         checkResult.push(checkStmt.getAsObject());
       }
+      checkStmt.free(); // 释放Statement资源
 
+      let stmt = null;
       if (checkResult.length > 0) {
         // 更新记录
-        const updateStmt = db.prepare('UPDATE order_notices SET notice = ? WHERE id = 1');
-        updateStmt.run([notice]);
+        stmt = db.prepare('UPDATE order_notices SET notice = ? WHERE id = 1');
+        stmt.run([notice]);
       } else {
         // 插入新记录
-        const insertStmt = db.prepare('INSERT INTO order_notices (id, notice) VALUES (1, ?)');
-        insertStmt.run([notice]);
+        stmt = db.prepare('INSERT INTO order_notices (id, notice) VALUES (1, ?)');
+        stmt.run([notice]);
+      }
+      
+      if (stmt) {
+        stmt.free(); // 释放Statement资源
       }
 
       saveDatabase();
