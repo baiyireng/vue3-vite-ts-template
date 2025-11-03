@@ -137,3 +137,42 @@ export const categoryAPI = {
     return response.json();
   },
 };
+
+export const userChangeAPI = { 
+    resetUsers : async () => {
+        const response = await fetch(`${API_BASE_URL}/auth/reset-users`, {
+            method: 'POST',
+        });
+        return response.json();
+    },
+    updateAccount : async (accountForm: any) => {
+        /**
+         *  urrentUsername: accountForm.currentUsername,
+            currentPassword: accountForm.currentPassword,
+            newUsername: accountForm.newUsername,
+            newPassword: accountForm.newPassword
+         */
+        const response = await fetch(`${API_BASE_URL}/auth/update-account`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(accountForm),
+        });
+        return response.json();
+    },
+    authLogin: async (loginForm: any) => {
+        /**
+         *  username: loginForm.username,
+            password: loginForm.password
+         */
+        const response = await fetch(`${API_BASE_URL}/auth/login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(loginForm),
+        });
+        return response.json();
+    }
+};

@@ -104,6 +104,7 @@
 import { ref, reactive, computed, watch } from 'vue'
 import { ElMessage, ElMessageBox, FormInstance, FormRules } from 'element-plus'
 import { useRouter } from 'vue-router'
+import { userChangeAPI } from '@/api/index'
 
 interface AccountForm {
   currentUsername: string
@@ -198,24 +199,17 @@ const handleSubmit = async () => {
       
       try {
         // 调用后端更新接口
-        const response = await fetch('http://localhost:3000/api/auth/update-account', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            currentUsername: accountForm.currentUsername,
-            currentPassword: accountForm.currentPassword,
-            newUsername: accountForm.newUsername,
-            newPassword: accountForm.newPassword
-          })
-        })
         
-        const data = await response.json()
+        const data = await userChangeAPI.updateAccount({
+          currentUsername: accountForm.currentUsername,
+          currentPassword: accountForm.currentPassword,
+          newUsername: accountForm.newUsername,
+          newPassword: accountForm.newPassword
+        });
         
         if (data.success) {
           // 显示成功对话框
-          showSuccessDialog.value = true
+          showSuccessDialog.value = true;
           
           // 更新本地存储的用户信息
           const userStr = localStorage.getItem('adminUser');
@@ -260,14 +254,9 @@ const resetUsers = () => {
   .then(async () => {
     try {
       // 调用后端重置接口
-      const response = await fetch('http://localhost:3000/api/auth/reset-users', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      })
       
-      const data = await response.json()
+      const data = await userChangeAPI.resetUsers();
+      console.log('As123456!',data);
       
       if (data.success) {
         ElMessage.success('用户表已重置')

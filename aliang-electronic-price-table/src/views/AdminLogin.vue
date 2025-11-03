@@ -56,6 +56,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
+import { userChangeAPI } from '../api/index';
 
 const router = useRouter();
 const loading = ref(false);
@@ -99,18 +100,10 @@ const handleLogin = async () => {
   
   try {
     // 调用后端登录接口
-    const response = await fetch('http://localhost:3000/api/auth/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
+    const data = await userChangeAPI.authLogin({
         username: loginForm.username,
         password: loginForm.password
-      })
     });
-    
-    const data = await response.json();
     
     if (data.success) {
       // 登录成功，保存token到localStorage

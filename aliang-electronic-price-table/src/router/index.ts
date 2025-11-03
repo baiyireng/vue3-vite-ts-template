@@ -23,7 +23,7 @@ const verifyToken = async () => {
 
   try {
     // 调用新的认证接口获取用户信息（需在请求头中传递 token）
-    const response = await fetch('http://localhost:3000/api/auth/me', {
+    const response = await fetch('/api/auth/me', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
