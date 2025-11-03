@@ -206,10 +206,26 @@ const handleImageUpload = async (event: Event, name: string) => {
   const file = target.files?.[0]
   
   if (file) {
+    // 验证文件类型
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+    if (!validTypes.includes(file.type)) {
+      ElMessage.error('仅支持上传图片文件（JPG、PNG、GIF、WebP）')
+      target.value = ''
+      return
+    }
+    
+    // 验证文件大小（限制5MB）
+    if (file.size > 5 * 1024 * 1024) {
+      ElMessage.error('图片大小不能超过5MB')
+      target.value = ''
+      return
+    }
+    
     try {
       // 创建FormData对象用于上传文件
       const formData = new FormData()
       formData.append('image', file)
+      formData.append('imageName', name) // 添加图片名称字段，帮助后端识别图片用途
       
       // 上传图片到服务器
       const response = await fetch('/api/upload', {
@@ -217,9 +233,14 @@ const handleImageUpload = async (event: Event, name: string) => {
         body: formData
       })
       
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
       const result = await response.json()
       
-      if (result.url) {
+      // 确保返回结果包含url字段
+      if (result && typeof result === 'object' && result.url) {
         // 更新图片URL
         const image = images.find(img => img.name === name)
         if (image) {
@@ -227,11 +248,16 @@ const handleImageUpload = async (event: Event, name: string) => {
         }
         ElMessage.success('图片上传成功')
       } else {
-        ElMessage.error('图片上传失败')
+        console.error('上传响应格式错误:', result)
+        ElMessage.error('图片上传失败：响应格式错误')
       }
     } catch (error) {
       console.error('上传失败:', error)
-      ElMessage.error('上传失败: ' + (error as Error).message)
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        ElMessage.error('上传失败：网络连接错误')
+      } else {
+        ElMessage.error('上传失败: ' + (error as Error).message)
+      }
     }
     
     // 清空input值，以便下次选择同一文件也能触发change事件

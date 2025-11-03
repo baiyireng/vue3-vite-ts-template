@@ -68,6 +68,7 @@
         :before-upload="beforeUpload"
         :data="{ field: uploadField }"
         accept="image/*"
+        name="image"
       >
         <el-icon class="el-icon--upload"><upload-filled /></el-icon>
         <div class="el-upload__text">
