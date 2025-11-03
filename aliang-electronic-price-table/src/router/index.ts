@@ -57,47 +57,47 @@ const routes = [
     component: RechargeBenefits,
   },
   {
-        path: '/category/:id',
-        name: 'CategoryDetails',
-        component: CategoryDetails,
-        meta: { requiresAuth: true }
-      },
+    path: '/category/:id',
+    name: 'CategoryDetails',
+    component: CategoryDetails
+    },
   {
     path: '/admin/login',
     name: 'AdminLogin',
-    component: ()=> AdminLogin,
+    component: () => import('@/views/AdminLogin.vue'),
   },
   {
     path: '/admin',
     name: 'Admin',
     component: () => import('@/views/admin/index.vue'),
+    meta: { requiresAuth: true },
     children: [
         {
         path: '',
-        redirect: '/admin/dashboard'
+        redirect: '/admin/dashboard',
       },
       {
         path: 'dashboard',
         name: 'AdminDashboard',
-        component: AdminDashboard,
+        component: () => import('@/views/admin/Dashboard.vue'),
         meta: { requiresAuth: true }
       },
       {
         path: 'categories',
         name: 'CategoryManagement',
-        component: CategoryManagement,
+        component: () => import('@/views/admin/CategoryManagement.vue'),
         meta: { requiresAuth: true }
       },
       {
         path: 'account',
         name: 'AccountManagement',
-        component: AccountManagement,
+        component: () => import('@/views/admin/AccountManagement.vue'),
         meta: { requiresAuth: true }
       },
       {
         path: 'website',
         name: 'WebsiteSettings',
-        component: WebsiteSettings,
+        component: () => import('@/views/admin/WebsiteSettings.vue'),
         meta: { requiresAuth: true }
       }
     ]
@@ -149,8 +149,9 @@ const router = createRouter({
 // 添加路由守卫
 router.beforeEach(async (to, from, next) => {
   // 定义公开页面
-  const publicPages = ['/admin/login','/','/recharge-benefits'];
-  const authRequired = !publicPages.includes(to.path);
+//   const publicPages = ['/admin/login','/','/recharge-benefits','/category/:id'];
+//   const authRequired = !publicPages.includes(to.path);
+    const authRequired = to.meta?.requiresAuth||false;
   const loggedIn = isAuthenticated();
 
   // 尝试从URL参数获取token
