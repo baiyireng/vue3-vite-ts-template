@@ -3,15 +3,12 @@
     <div class="disclaimer_section">
       <span class="weaken">本页面由</span>
       <span class="emphasize">
-        <a 
+        <span 
           id="huoban-link" 
-          href="https://lilihuyu.com" 
           class=""
-          target="_blank" 
-          rel="noreferrer"
         >
-          礼礼互娱
-        </a>
+          {{appName}}
+        </span>
       </span>
       <span class="weaken">提供技术支持</span>
     </div>
@@ -19,6 +16,9 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from "vue";
+
+const appName = ref(import.meta.env?.VITE_APP_NAME||'');
 // Footer component for the price table page
 </script>
 

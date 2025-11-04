@@ -1,6 +1,6 @@
 <template>
     <div class="admin-dashboard">
-        <h1 style="text-align: center;">阿良电竞价格表管理后台</h1>
+        <h1 style="text-align: center;">{{appName}}价格表管理后台</h1>
 
         <div class="navigation">
             <router-link
@@ -43,6 +43,7 @@ import { useRouter } from 'vue-router';
 
 // 当前激活的标签页
 const activeTab = ref('home');
+const appName = ref(import.meta.env?.VITE_APP_NAME||'电商');
 
 // 编辑器实例，必须用 shallowRef
 const editorRef = ref();

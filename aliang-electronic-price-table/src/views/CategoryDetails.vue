@@ -13,7 +13,7 @@
         <main class="recharge-benefits-content">
             <!-- 长图展示 -->
             <section v-if="category?.detail_image" class="image-section">
-                <img :src="category.detail_image" alt="充值福利及礼物" />
+                <img :src="category.detail_image" alt="充值福利及礼物" @click="handleClick(category.detail_image)" />
             </section>
 
             <!-- 注意事项 -->
@@ -31,10 +31,17 @@
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { categoryAPI } from '@/api/index';
+import { previewImages } from 'hevue-img-preview/v3';
 
 const route = useRoute();
 const router = useRouter();
 const category = ref<any>(null);
+
+const handleClick = (img) => {
+    if (!img) return;
+    previewImages(img);
+};
+
 
 // 从后端获取品类详情
 const fetchCategoryDetails = async (categoryId: number) => {

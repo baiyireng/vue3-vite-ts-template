@@ -49,6 +49,13 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { previewImages } from 'hevue-img-preview/v3';
+
+const handleClick = (img) => {
+    if (!img) return;
+    previewImages(img);
+};
+
 
 const props = defineProps<{
     visible: boolean;

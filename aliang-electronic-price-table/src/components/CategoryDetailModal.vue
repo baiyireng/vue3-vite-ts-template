@@ -14,7 +14,7 @@
             <div class="modal-body">
                 <!-- 详情长图 -->
                 <div v-if="categoryData?.detail_image" class="image-section">
-                    <img :src="categoryData.detail_image" alt="详情长图" />
+                    <img :src="categoryData.detail_image" alt="详情长图" @click="handleClick(categoryData.detail_image)" />
                 </div>
 
                 <!-- 注意事项 -->
@@ -35,6 +35,13 @@
 import { ref, onMounted, watch } from 'vue';
 import { categoryAPI } from '@/api/index';
 import Footer from '@/components/Footer.vue';
+import { previewImages } from 'hevue-img-preview/v3';
+
+const handleClick = (img) => {
+    if (!img) return;
+    previewImages(img);
+};
+
 
 const props = defineProps<{
     visible: boolean;
