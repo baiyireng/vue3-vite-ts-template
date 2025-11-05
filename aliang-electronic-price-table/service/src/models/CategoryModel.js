@@ -12,7 +12,6 @@ class CategoryModel {
       while (stmt.step()) {
         result.push(stmt.getAsObject());
       }
-      stmt.free(); // 释放Statement资源
       callback(null, result);
     } catch (err) {
       callback(err, null);
@@ -26,22 +25,17 @@ class CategoryModel {
       const stmt = db.prepare('SELECT *, strftime(\'%Y-%m-%d %H:%M:%S\', created_at) as created_at, strftime(\'%Y-%m-%d %H:%M:%S\', updated_at) as updated_at FROM categories WHERE id = ?');
       stmt.bind([id]);
       const result = stmt.step() ? stmt.getAsObject() : null;
-      stmt.free(); // 释放Statement资源
       callback(null, result);
     } catch (err) {
       callback(err, null);
     }
   }
 
-  // 添加新品类
-  static addCategory(category, callback) {
+  // 创建新品类
+  static createCategory(category, callback) {
     try {
       const db = getDatabase();
-      const stmt = db.prepare(`
-        INSERT INTO categories 
-        (name, description, icon, detail_image, details, notice, sort_order, created_at, updated_at) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
-      `);
+      const stmt = db.prepare('INSERT INTO categories (name, description, icon, detail_image, details, notice, sort_order, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, datetime(\'now\'), datetime(\'now\'))');
       stmt.run([
         category.name,
         category.description,
@@ -51,7 +45,6 @@ class CategoryModel {
         category.notice,
         category.sort_order || 0
       ]);
-      stmt.free(); // 释放Statement资源
       
       // 获取插入的ID
       const result = db.exec("SELECT last_insert_rowid() as id");
@@ -78,7 +71,7 @@ class CategoryModel {
         category.sort_order || 0,
         id
       ]);
-      stmt.free(); // 释放Statement资源
+      
       saveDatabase();
       callback(null, { changes: stmt.getRowsModified ? stmt.getRowsModified() : 1 });
     } catch (err) {
@@ -92,10 +85,23 @@ class CategoryModel {
       const db = getDatabase();
       const stmt = db.prepare('DELETE FROM categories WHERE id = ?');
       stmt.run([id]);
-      stmt.free(); // 释放Statement资源
-d]);
       
-ed() : 1 });
+      saveDatabase();
+      callback(null, { changes: stmt.getRowsModified ? stmt.getRowsModified() : 1 });
+    } catch (err) {
+      callback(err, null);
+    }
+  }
+
+  // 更新品类排序
+  static updateSortOrder(id, sortOrder, callback) {
+    try {
+      const db = getDatabase();
+      const stmt = db.prepare('UPDATE categories SET sort_order = ? WHERE id = ?');
+      stmt.run([sortOrder, id]);
+      
+      saveDatabase();
+      callback(null, { changes: stmt.getRowsModified ? stmt.getRowsModified() : 1 });
     } catch (err) {
       callback(err, null);
     }
